@@ -1012,4 +1012,4 @@ if __name__ == "__main__":
     print(f"  ║  Pricing →  http://localhost:{port}/pricing ║")
     print(f"  ║  Docs    →  http://localhost:{port}/api/docs ║")
     print(f"  ╚══════════════════════════════════════════╝\n")
-    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
