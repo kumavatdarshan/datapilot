@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataPilot v2 — Real Data Science</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050709;--bg2:#0b0d14;--bg3:#101320;--bg4:#161929;--bg5:#1d2135;
+  --border:#1a1f32;--border2:#252d48;--border3:#323d60;
+  --text:#e4e8f5;--text2:#7e8ab5;--text3:#424d7a;
+  --accent:#5b8dee;--accent2:#8db4ff;
+  --green:#13e882;--green-d:rgba(19,232,130,0.09);
+  --amber:#f0a500;--amber-d:rgba(240,165,0,0.09);
+  --red:#f0506e;--red-d:rgba(240,80,110,0.09);
+  --pink:#d946ef;--teal:#22d3ee;--purple:#8b5cf6;
+  --r:8px;--rsm:5px;--rlg:14px;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Sora',sans-serif;
+}
+*{scrollbar-width:thin;scrollbar-color:var(--border2) var(--bg2)}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(91,141,238,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(91,141,238,.03) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 45% at 25% -5%,rgba(91,141,238,.07),transparent),radial-gradient(ellipse 50% 35% at 85% 90%,rgba(139,92,246,.05),transparent);pointer-events:none;z-index:0}
+.shell{max-width:1340px;margin:0 auto;padding:0 1.5rem 6rem;position:relative;z-index:1}
+/* HEADER */
+.hdr{padding:1.1rem 0;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);margin-bottom:1.75rem;flex-wrap:wrap;gap:10px}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#3b82f6,#7c3aed);border-radius:9px;display:grid;place-items:center;box-shadow:0 0 20px rgba(59,130,246,.3),inset 0 1px 0 rgba(255,255,255,.12);flex-shrink:0}
+.logo svg{width:18px;height:18px;fill:#fff}
+.brand{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.brand em{color:var(--accent);font-style:normal}
+.brand small{display:block;font-size:9px;font-weight:400;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.api-cfg{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}
+.api-url-input,.api-sid{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--mono);font-size:10px;padding:5px 10px;outline:none;transition:border-color .12s}
+.api-url-input{width:220px}.api-sid{width:90px}
+.api-url-input:focus,.api-sid:focus{border-color:var(--accent);color:var(--text)}
+.api-connect-btn{font-size:10px;padding:5px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--rsm);cursor:pointer;color:var(--text2);font-family:var(--mono);font-weight:700;white-space:nowrap;transition:all .12s}
+.api-connect-btn:hover{border-color:var(--accent);color:var(--accent)}
+.api-status{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);color:var(--text3);white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:all .3s;flex-shrink:0}
+.dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dot.off{background:var(--red);box-shadow:0 0 6px var(--red)}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;gap:1.25rem;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+/* SIDEBAR */
+.sidebar{position:sticky;top:1rem;display:flex;flex-direction:column;gap:.75rem}
+.side-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);overflow:hidden}
+.side-label{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);padding:9px 13px;border-bottom:1px solid var(--border);background:var(--bg3)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 13px;cursor:pointer;transition:all .12s;font-size:12px;color:var(--text2);border-left:2px solid transparent;font-weight:500;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--text);border-left-color:var(--border2)}
+.nav-item.active{background:rgba(91,141,238,.07);color:var(--accent);border-left-color:var(--accent)}
+.ni{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.nb{margin-left:auto;font-size:8px;font-family:var(--mono);padding:1px 5px;border-radius:3px;background:var(--bg5);color:var(--text3)}
+.nb.real{background:rgba(19,232,130,.1);color:var(--green);border:1px solid rgba(19,232,130,.2)}
+.sess-body{padding:10px 13px;font-size:11px}
+.sr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.sk{color:var(--text3);font-family:var(--mono);font-size:9px}
+.sv{font-weight:600;font-family:var(--mono);font-size:11px;color:var(--text)}
+/* MAIN */
+.main{min-width:0}
+.panel{display:none}
+.panel.active{display:block;animation:fu .18s ease}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:1.25rem}
+.pt{font-family:var(--mono);font-size:15px;font-weight:700;letter-spacing:-.025em;margin-bottom:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ps{font-size:11px;color:var(--text3)}
+/* UPLOAD */
+.uz{border:1.5px dashed var(--border2);border-radius:var(--rlg);padding:3rem 2rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2);position:relative;overflow:hidden}
+.uz::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(91,141,238,.1),transparent 65%);opacity:0;transition:opacity .2s}
+.uz.drag,.uz:hover{border-color:var(--accent);background:var(--bg3)}
+.uz.drag::before,.uz:hover::before{opacity:1}
+.uz-icon{font-size:34px;margin-bottom:10px;filter:drop-shadow(0 0 10px rgba(91,141,238,.4))}
+.uz-title{font-family:var(--mono);font-size:13px;font-weight:700;margin-bottom:4px}
+.uz-hint{font-size:11px;color:var(--text3);line-height:1.7}
+.uz-hint strong{color:var(--green)}
+#fi{display:none}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:1.25rem;margin-bottom:1rem}
+.card-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;gap:8px;flex-wrap:wrap}
+.card-t{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);display:flex;align-items:center;gap:6px}
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem}
+.s{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative;overflow:hidden;transition:border-color .15s}
+.s:hover{border-color:var(--border2)}
+.s::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--purple));opacity:0;transition:opacity .15s}
+.s:hover::before{opacity:1}
+.sl{font-size:9px;color:var(--text3);margin-bottom:5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.sval{font-size:20px;font-weight:700;font-family:var(--mono);letter-spacing:-.04em}
+/* TABLE */
+.tw{overflow-x:auto}
+table.dp{width:100%;border-collapse:collapse;font-size:11px}
+table.dp th{text-align:left;padding:7px 11px;background:var(--bg3);font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);color:var(--text3);white-space:nowrap}
+table.dp td{padding:7px 11px;border-bottom:1px solid var(--border);color:var(--text2)}
+table.dp tr:last-child td{border-bottom:none}
+table.dp tr:hover td{background:var(--bg3);color:var(--text)}
+.mono{font-family:var(--mono);font-size:10px}
+/* BADGES */
+.b{display:inline-block;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;font-family:var(--mono)}
+.bok{background:var(--green-d);color:var(--green);border:1px solid rgba(19,232,130,.2)}
+.bwarn{background:var(--amber-d);color:var(--amber)}
+.berr{background:var(--red-d);color:var(--red)}
+.bblue{background:rgba(91,141,238,.1);color:var(--accent)}
+.bpurp{background:rgba(139,92,246,.1);color:var(--purple)}
+.bneu{background:var(--bg5);color:var(--text2)}
+.breal{background:rgba(19,232,130,.1);color:var(--green);border:1px solid rgba(19,232,130,.2)}
+/* FORMS */
+.fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin-bottom:10px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+select.fi,input.fi{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 9px;outline:none;transition:border-color .12s;width:100%}
+select.fi:focus,input.fi:focus{border-color:var(--accent)}
+/* BUTTONS */
+.btn{padding:7px 16px;border:none;border-radius:var(--rsm);cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;transition:all .15s;letter-spacing:.03em;display:inline-flex;align-items:center;gap:6px}
+.btnp{background:linear-gradient(135deg,var(--accent),#6d28d9);color:#fff;box-shadow:0 3px 16px rgba(91,141,238,.2)}
+.btnp:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,141,238,.35)}
+.btnp:disabled{opacity:.25;cursor:default;transform:none;box-shadow:none}
+.btns{background:var(--bg4);border:1px solid var(--border2);color:var(--text2)}
+.btns:hover{background:var(--bg5);border-color:var(--border3);color:var(--text)}
+/* ALERTS */
+.alert{padding:9px 13px;border-radius:var(--rsm);font-size:12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.ai{background:rgba(91,141,238,.07);border:1px solid rgba(91,141,238,.18);color:var(--accent2)}
+.aok{background:var(--green-d);border:1px solid rgba(19,232,130,.2);color:var(--green)}
+.aerr{background:var(--red-d);border:1px solid rgba(240,80,110,.2);color:var(--red)}
+.awarn{background:var(--amber-d);border:1px solid rgba(240,165,0,.2);color:var(--amber)}
+/* LOADING */
+.lbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.lfill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple),var(--teal));background-size:200%;animation:shim 1.5s linear infinite;border-radius:2px}
+@keyframes shim{0%{background-position:100%}100%{background-position:-100%}}
+.ltxt{font-size:11px;font-family:var(--mono);color:var(--text3);text-align:center;padding:18px}
+/* CHARTS */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:1rem}
+.cbox{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rlg);padding:1.1rem;transition:border-color .2s}
+.cbox:hover{border-color:var(--border2)}
+.cboxfull{grid-column:1/-1}
+.ct{font-family:var(--mono);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:2px}
+.cs{font-size:10px;color:var(--text3);margin-bottom:12px}
+.cins{margin-top:10px;font-size:11px;color:var(--text2);padding:8px 11px;background:var(--bg3);border-radius:var(--rsm);border-left:2px solid var(--accent)}
+/* ML */
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:.85rem}
+.m{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px;text-align:center}
+.ml{font-size:9px;font-family:var(--mono);color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.mv{font-size:18px;font-weight:700;font-family:var(--mono)}
+/* FEATURE BARS */
+.fir{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.fil{font-family:var(--mono);font-size:10px;color:var(--text2);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fibw{flex:1;height:14px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.fibf{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:3px;transition:width .5s ease}
+.fiv{font-family:var(--mono);font-size:9px;color:var(--text3);width:40px;text-align:right;flex-shrink:0}
+/* CLEAN OPS */
+.opi{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .12s;margin-bottom:6px}
+.opi:hover{border-color:var(--border2);background:var(--bg4)}
+.opi.sel{border-color:var(--accent);background:rgba(91,141,238,.06)}
+.opck{width:15px;height:15px;border-radius:3px;border:1px solid var(--border2);display:grid;place-items:center;font-size:9px;flex-shrink:0;transition:all .12s}
+.opi.sel .opck{background:var(--accent);border-color:var(--accent);color:#fff}
+/* QUERY */
+.qbar{display:flex;gap:7px;margin-bottom:.85rem}
+.qi{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:12px;padding:9px 13px;outline:none;transition:border-color .15s}
+.qi:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,141,238,.1)}
+.qi::placeholder{color:var(--text3)}
+.qr{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:8px;font-size:12px;line-height:1.7;animation:fu .15s ease}
+.qop{font-family:var(--mono);font-size:9px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.qex{color:var(--text2);margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
+.chip{font-size:10px;padding:3px 9px;border:1px solid var(--border2);border-radius:99px;cursor:pointer;color:var(--text3);font-family:var(--mono);transition:all .12s;background:var(--bg4)}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,141,238,.06)}
+/* AI BADGE */
+.aibadge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-family:var(--mono);font-weight:700;background:linear-gradient(135deg,rgba(91,141,238,.15),rgba(139,92,246,.12));color:var(--accent2);border:1px solid rgba(91,141,238,.2);padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+/* THINKING */
+.think{display:flex;align-items:center;gap:3px;padding:6px 0}
+.think span{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:dot 1.4s infinite}
+.think span:nth-child(2){animation-delay:.2s}
+.think span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1.2);opacity:1}}
+/* LOG */
+.log{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-family:var(--mono);font-size:10px;line-height:1.9;max-height:180px;overflow-y:auto;color:var(--text3)}
+.log .ok{color:var(--green)} .log .err{color:var(--red)}
+/* CORR HEATMAP */
+.hm-wrap{overflow-x:auto;margin-top:8px}
+.hm-table{border-collapse:collapse}
+.hm-table td,.hm-table th{padding:0;border:1px solid rgba(0,0,0,.3)}
+.hm-cell{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono)}
+.hm-hdr{font-family:var(--mono);font-size:9px;color:var(--text3);padding:4px 5px;white-space:nowrap;max-width:60px;overflow:hidden;text-overflow:ellipsis}
+/* AB */
+.abrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.abrow:last-child{border-bottom:none}
+.abcol{font-family:var(--mono);font-size:11px;width:110px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.aba,.abb{flex:1;font-family:var(--mono);font-size:11px;text-align:center}
+.abdiff{width:70px;text-align:right;font-family:var(--mono);font-size:10px;flex-shrink:0}
+.absig{width:45px;text-align:right;flex-shrink:0}
+/* IBOX */
+.ibox{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;margin-top:8px}
+.ibox-l{font-size:9px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.ibox-t{font-size:12px;color:var(--text2);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="hdr">
+  <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zm-11 11h7v7H3zm14 2h-2v2h2v2h2v-2h2v-2h-2v-2h-2v2z"/></svg></div>
+    <div><div class="brand">Data<em>Pilot</em><small>v3 · Monetized</small></div></div>
+  </a>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;font-size:10px;font-family:var(--mono);color:var(--text3)">
+      <div class="dot" id="dot"></div><span id="dottxt">Starting…</span>
+    </div>
+    <span id="tier-badge" style="display:none;font-size:9px;font-family:var(--mono);padding:2px 8px;border-radius:3px;font-weight:700"></span>
+    <a id="upgrade-btn" href="/pricing" style="display:none;font-size:10px;font-family:var(--mono);color:#fff;background:var(--accent);text-decoration:none;padding:4px 10px;border-radius:4px;font-weight:700;white-space:nowrap">Upgrade →</a>
+    <span id="nav-email" style="font-size:10px;font-family:var(--mono);color:var(--text3)"></span>
+    <button id="logout-btn" onclick="logout()" style="display:none;font-size:9px;font-family:var(--mono);color:var(--text3);background:none;border:1px solid var(--border2);padding:3px 9px;border-radius:3px;cursor:pointer">Log out</button>
+    <a id="login-btn" href="/" style="display:none;font-size:10px;font-family:var(--mono);color:var(--accent);border:1px solid rgba(91,141,238,.3);padding:4px 10px;border-radius:4px;text-decoration:none;font-weight:700">Log in / Sign up</a>
+    <a href="/api/docs" target="_blank" style="font-size:9px;font-family:var(--mono);color:var(--text3);text-decoration:none;border:1px solid var(--border2);padding:3px 9px;border-radius:3px">API Docs ↗</a>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="side-card">
+    <div class="side-label">Panels</div>
+    <div class="nav-item active" data-p="upload" onclick="nav(this)"><span class="ni">📂</span>Upload<span class="nb">Start</span></div>
+    <div class="nav-item" data-p="profile" onclick="nav(this)"><span class="ni">🔍</span>Profile<span class="nb real">pandas</span></div>
+    <div class="nav-item" data-p="eda" onclick="nav(this)"><span class="ni">📊</span>EDA Charts<span class="nb real">scipy</span></div>
+    <div class="nav-item" data-p="clean" onclick="nav(this)"><span class="ni">🧹</span>Clean<span class="nb real">pandas</span></div>
+    <div class="nav-item" data-p="analyze" onclick="nav(this)"><span class="ni">🔬</span>Analyze<span class="nb real">ANOVA</span></div>
+    <div class="nav-item nav-pro" data-p="ml" onclick="nav(this)"><span class="ni">🤖</span>Train Model<span class="nb" id="nb-ml">Pro</span></div>
+    <div class="nav-item nav-pro" data-p="forecast" onclick="nav(this)"><span class="ni">📈</span>Forecast<span class="nb" id="nb-fc">Pro</span></div>
+    <div class="nav-item nav-pro" data-p="query" onclick="nav(this)"><span class="ni">💬</span>AI Query<span class="nb" id="nb-q">Pro</span></div>
+    <div class="nav-item" data-p="compare" onclick="nav(this)"><span class="ni">⚖️</span>A/B Compare<span class="nb real">t-test</span></div>
+    <div class="nav-item" data-p="export" onclick="nav(this)"><span class="ni">📤</span>Export<span class="nb">CSV·JSON</span></div>
+  </div>
+  <div class="side-card" id="demo-banner" style="display:none">
+    <div class="side-label">Demo mode</div>
+    <div style="padding:10px 13px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5">You're exploring with a 100-row sample. Create a free account to save your work.</div>
+      <a href="/" style="display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;padding:7px;border-radius:6px;font-size:12px;font-weight:600">Sign up free →</a>
+    </div>
+  </div>
+  <div class="side-card" id="sesscard" style="display:none">
+    <div class="side-label">Session</div>
+    <div class="sess-body" id="sessbody"></div>
+  </div>
+  <div class="side-card">
+    <div class="side-label">Stack</div>
+    <div style="padding:9px 13px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2">
+      <div style="color:var(--green)">✓ FastAPI backend</div>
+      <div style="color:var(--green)">✓ pandas · numpy</div>
+      <div style="color:var(--green)">✓ scikit-learn</div>
+      <div style="color:var(--green)">✓ statsmodels ARIMA</div>
+      <div style="color:var(--green)">✓ scipy.stats tests</div>
+      <div style="color:var(--green)">✓ Real train/test split</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- UPLOAD -->
+<div class="panel active" id="panel-upload">
+  <div class="ph"><div class="pt">Upload Dataset</div><div class="ps">CSV · Excel · JSON · TSV → parsed by pandas on the backend</div></div>
+  <div class="uz" id="uz" onclick="document.getElementById('fi').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+    <div class="uz-icon">⬆️</div>
+    <div class="uz-title">Drop file or click to browse</div>
+    <div class="uz-hint">Supports <strong>CSV · Excel · JSON · TSV</strong><br>Uploaded to FastAPI → parsed with pandas</div>
+  </div>
+  <input type="file" id="fi" accept=".csv,.xlsx,.xls,.json,.tsv" onchange="upload(this.files[0])">
+  <div id="upload-out"></div>
+</div>
+
+<!-- PROFILE -->
+<div class="panel" id="panel-profile">
+  <div class="ph"><div class="pt">Column Profile <span class="b breal">pandas</span></div><div class="ps">Shapiro-Wilk normality · IQR outliers · entropy · skewness · kurtosis</div></div>
+  <div id="profile-out"><div class="ltxt">Upload a file first</div></div>
+</div>
+
+<!-- EDA CHARTS -->
+<div class="panel" id="panel-eda">
+  <div class="ph"><div class="pt">EDA Charts <span class="b breal">backend-computed</span></div><div class="ps">Histograms + KDE · scatter + regression line · correlation heatmap · box plots · time series</div></div>
+  <div id="eda-out"><div class="ltxt">Upload a file first</div></div>
+</div>
+
+<!-- CLEAN -->
+<div class="panel" id="panel-clean">
+  <div class="ph"><div class="pt">Data Cleaning <span class="b breal">pandas</span></div><div class="ps">Server-side cleaning operations that persist in your session</div></div>
+  <div id="clean-out"><div class="ltxt">Upload a file first</div></div>
+</div>
+
+<!-- ANALYZE -->
+<div class="panel" id="panel-analyze">
+  <div class="ph"><div class="pt">Statistical Analysis <span class="b breal">scipy + statsmodels</span></div><div class="ps">Pearson correlations · ANOVA · chi-square + Cramér's V · normality tests · time series decomposition</div></div>
+  <div id="analyze-out"><div class="ltxt">Upload a file first</div></div>
+</div>
+
+<!-- ML -->
+<div class="panel" id="panel-ml">
+  <div class="ph"><div class="pt">Train Model <span class="b breal">scikit-learn</span></div><div class="ps">Real train/test split · cross-validation · feature importance · confusion matrix · actual metrics</div></div>
+  <!-- LOCK OVERLAY — hidden for Pro/Team users via JS -->
+  <div id="ml-lock" class="lock-gate" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rlg);padding:2.5rem;text-align:center;margin-bottom:1rem">
+    <div style="font-size:28px;margin-bottom:.75rem">🔒</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:.5rem">Pro feature</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto">Train 6 ML algorithms on your data — linear regression, random forest, gradient boosting, k-means and more. Upgrade to Pro to unlock.</div>
+    <a href="/pricing" style="display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:600">See Pro plans →</a>
+  </div>
+  <div id="ml-content" style="display:none">
+  <div class="card">
+    <div class="card-h"><div class="card-t">🤖 Configuration</div></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Model Type</label>
+        <select class="fi" id="ml-type" onchange="mlConfig()">
+          <option value="linear_regression">Linear Regression</option>
+          <option value="ridge">Ridge Regression (L2)</option>
+          <option value="random_forest_reg">Random Forest Regressor</option>
+          <option value="gradient_boosting">Gradient Boosting</option>
+          <option value="logistic">Logistic Regression</option>
+          <option value="random_forest_clf">Random Forest Classifier</option>
+          <option value="kmeans">K-Means Clustering</option>
+        </select>
+      </div>
+      <div class="fg" id="ml-tg"><label class="fl">Target Column</label><select class="fi" id="ml-target"><option>— upload file —</option></select></div>
+      <div class="fg"><label class="fl">Test Split</label>
+        <select class="fi" id="ml-split">
+          <option value="0.2">20% holdout</option>
+          <option value="0.3">30% holdout</option>
+          <option value="0.15">15% holdout</option>
+        </select>
+      </div>
+    </div>
+    <div class="fr" id="ml-extras" style="display:none">
+      <div class="fg"><label class="fl">N Estimators</label><input class="fi" id="ml-nest" type="number" value="100" min="10" max="500"></div>
+      <div class="fg" id="ml-kg" style="display:none"><label class="fl">K Clusters</label><input class="fi" id="ml-k" type="number" value="3" min="2" max="10"></div>
+    </div>
+    <button class="btn btnp" id="ml-btn" onclick="runML()" disabled>▶ Train Model</button>
+  </div>
+  <div id="ml-out"></div>
+  </div>
+</div>
+
+<!-- FORECAST -->
+<div class="panel" id="panel-forecast">
+  <div class="ph"><div class="pt">Forecast <span class="b breal">ARIMA + ETS</span></div><div class="ps">statsmodels ARIMA(1,1,1) + Holt-Winters ETS · AIC model selection · 95% confidence intervals</div></div>
+  <div id="fc-lock" class="lock-gate" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rlg);padding:2.5rem;text-align:center;margin-bottom:1rem">
+    <div style="font-size:28px;margin-bottom:.75rem">🔒</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:.5rem">Pro feature</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem;max-width:400px;margin-left:auto;margin-right:auto">ARIMA and ETS time series forecasting with confidence intervals. Automatically selects the best model using AIC. Requires a Pro plan.</div>
+    <a href="/pricing" style="display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:600">See Pro plans →</a>
+  </div>
+  <div id="fc-content" style="display:none">
+  <div class="card">
+    <div class="card-h"><div class="card-t">📈 Configuration</div></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Target Column</label><select class="fi" id="fc-target"><option>— upload file —</option></select></div>
+      <div class="fg"><label class="fl">Date Column (optional)</label><select class="fi" id="fc-date"><option value="">— none / row index —</option></select></div>
+      <div class="fg"><label class="fl">Periods Ahead</label><input class="fi" id="fc-periods" type="number" value="8" min="1" max="36"></div>
+    </div>
+    <button class="btn btnp" id="fc-btn" onclick="runForecast()" disabled>▶ Run Forecast</button>
+  </div>
+  <div id="fc-out"></div>
+  </div>
+</div>
+
+<!-- QUERY -->
+<div class="panel" id="panel-query">
+  <div class="ph"><div class="pt">AI Query Engine <span class="aibadge">✦ Claude-powered</span></div><div class="ps">Natural language → real data operations. Backend rule engine + Claude for complex queries.</div></div>
+  <div id="query-lock" class="lock-gate" style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rlg);padding:2.5rem;text-align:center;margin-bottom:1rem">
+    <div style="font-size:28px;margin-bottom:.75rem">🔒</div>
+    <div style="font-size:16px;font-weight:600;margin-bottom:.5rem">Pro feature</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:.5rem;max-width:420px;margin-left:auto;margin-right:auto">Ask your data anything in plain English. <em style="color:var(--text)">"Top 10 customers by revenue" · "Correlation between price and sales" · "Sum orders by region"</em> — powered by Claude.</div>
+    <div style="margin-bottom:1.5rem"></div>
+    <a href="/pricing" style="display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:600">See Pro plans →</a>
+  </div>
+  <div id="query-content" style="display:none">
+  <div class="alert ai" style="margin-bottom:.75rem"><span>💡 Rule engine: <em>top 10 by revenue · filter age &gt; 30 · correlation between X and Y · sum sales by region · create column profit = revenue - cost</em></span></div>
+  <div class="qbar">
+    <input class="qi" id="qi" placeholder="Ask your data anything…" onkeydown="if(event.key==='Enter')runQuery()">
+    <button class="btn btnp" id="q-btn" onclick="runQuery()" disabled>Run ↵</button>
+  </div>
+  <div id="q-chips" class="chips"></div>
+  <div id="q-hist"></div>
+  </div>
+</div>
+
+<!-- A/B COMPARE -->
+<div class="panel" id="panel-compare">
+  <div class="ph"><div class="pt">A/B Group Compare <span class="b breal">Welch's t-test</span></div><div class="ps">Statistical significance testing between two segments · Cohen's d effect size</div></div>
+  <div class="card">
+    <div class="card-h"><div class="card-t">⚖️ Configure</div></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Group Column</label><select class="fi" id="ab-gcol" onchange="loadABGroups()"><option>— upload file —</option></select></div>
+      <div class="fg"><label class="fl">Group A</label><select class="fi" id="ab-ga"><option>—</option></select></div>
+      <div class="fg"><label class="fl">Group B</label><select class="fi" id="ab-gb"><option>—</option></select></div>
+    </div>
+    <button class="btn btnp" id="ab-btn" onclick="runCompare()" disabled>▶ Compare Groups</button>
+  </div>
+  <div id="ab-out"></div>
+</div>
+
+<!-- EXPORT -->
+<div class="panel" id="panel-export">
+  <div class="ph"><div class="pt">Export Data</div><div class="ps">Download the current session's cleaned and transformed data</div></div>
+  <div class="card">
+    <div class="card-h"><div class="card-t">📤 Download</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.85rem">
+      <button class="btn btnp" onclick="exportData('csv')">⬇ CSV</button>
+      <button class="btn btns" onclick="exportData('json')">⬇ JSON</button>
+    </div>
+    <div class="ibox"><div class="ibox-l">Note</div><div class="ibox-t">Downloads the <strong style="color:var(--text)">current session state</strong> — all cleaning and transformation operations applied.</div></div>
+  </div>
+  <!-- PDF Report — Pro paywall -->
+  <div id="pdf-lock-card" class="card" style="margin-top:.85rem;border-color:rgba(91,141,238,.25);background:rgba(91,141,238,.04)">
+    <div class="card-h"><div class="card-t">📄 PDF Report</div><span class="b" style="background:rgba(240,165,0,.12);color:var(--amber);border:1px solid rgba(240,165,0,.2)">Pro</span></div>
+    <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:.75rem">Generate a clean, shareable PDF of your full analysis — charts, statistics, and insights — ready to send to stakeholders.</div>
+        <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Includes: distribution charts · correlation heatmap · column profiles · data quality summary</div>
+      </div>
+      <div style="flex-shrink:0">
+        <a href="/pricing" style="display:inline-block;background:var(--accent);color:#fff;text-decoration:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;white-space:nowrap">Upgrade for PDF →</a>
+      </div>
+    </div>
+  </div>
+  <script>
+  // Hide PDF lock card for Pro/Team users
+  (function(){
+    const tier = (JSON.parse(localStorage.getItem('dp_user')||'{}').tier)||'free';
+    if(tier==='pro'||tier==='team'){
+      const c=document.getElementById('pdf-lock-card');
+      if(c){
+        c.style.borderColor='rgba(19,232,130,.25)';
+        c.style.background='rgba(19,232,130,.04)';
+        c.innerHTML=`<div class="card-h"><div class="card-t">📄 PDF Report</div><span class="b bok">Unlocked</span></div>
+          <button class="btn btnp" onclick="generatePDF()">⬇ Download PDF Report</button>`;
+      }
+    }
+  })();
+  async function generatePDF(){
+    toast('⏳ Generating PDF report…','ai');
+    try{
+      const r=await apiFetch(\`\${API}/export/pdf?session_id=\${SID}\`);
+      if(!r.ok){const d=await r.json();throw new Error(d.detail||'PDF failed');}
+      const blob=await r.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='datapilot_report.pdf';a.click();
+      URL.revokeObjectURL(url);
+    }catch(e){toast('❌ '+e.message,'aerr')}
+  }
+  </script>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+// ═══ STATE ═══
+const API = window.location.origin;
+let SID = 'default';
+let uploadData = null, edaCache = null, profileCache = null;
+let chartMap = {};
+let DEMO_MODE = false;   // true when user arrived via ?demo=1 without login
+let USER_TIER = 'free';  // 'free' | 'pro' | 'team'
+
+// ═══ AUTH BOOTSTRAP ═══
+(function initAuth(){
+  const token = localStorage.getItem('dp_token');
+  const userRaw = localStorage.getItem('dp_user');
+  const params = new URLSearchParams(window.location.search);
+  DEMO_MODE = params.get('demo') === '1' && !token;
+
+  if (token && userRaw) {
+    try {
+      const user = JSON.parse(userRaw);
+      USER_TIER = user.tier || 'free';
+      const emailEl = document.getElementById('nav-email');
+      const logoutBtn = document.getElementById('logout-btn');
+      const badge = document.getElementById('tier-badge');
+      const upgradeBtn = document.getElementById('upgrade-btn');
+      if (emailEl) emailEl.textContent = user.email || '';
+      if (logoutBtn) logoutBtn.style.display = '';
+      if (badge) {
+        badge.style.display = '';
+        badge.textContent = USER_TIER.toUpperCase();
+        badge.style.background = USER_TIER === 'free' ? 'rgba(240,165,0,.15)' : USER_TIER === 'pro' ? 'rgba(91,141,238,.15)' : 'rgba(139,92,246,.15)';
+        badge.style.color = USER_TIER === 'free' ? 'var(--amber)' : USER_TIER === 'pro' ? 'var(--accent2)' : '#c4b5fd';
+      }
+      if (upgradeBtn && USER_TIER === 'free') upgradeBtn.style.display = '';
+    } catch(e) {}
+  } else {
+    // Not logged in
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) loginBtn.style.display = '';
+    if (DEMO_MODE) {
+      USER_TIER = 'free';
+    } else if (!token) {
+      // No demo flag and not logged in — redirect to landing
+      window.location.href = '/';
+      return;
+    }
+  }
+
+  // Apply lock gates based on tier
+  const proFeatures = ['ml-lock','fc-lock','query-lock'];
+  const proContent  = ['ml-content','fc-content','query-content'];
+  const isPro = USER_TIER === 'pro' || USER_TIER === 'team';
+  proFeatures.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isPro ? 'none' : '';
+  });
+  proContent.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = isPro ? '' : 'none';
+  });
+
+  // Show demo banner in sidebar if not logged in
+  if (DEMO_MODE || !localStorage.getItem('dp_token')) {
+    const banner = document.getElementById('demo-banner');
+    if (banner) banner.style.display = '';
+  }
+
+  // Color Pro nav badges
+  ['nb-ml','nb-fc','nb-q'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (isPro) {
+      el.textContent = id === 'nb-ml' ? 'sklearn' : id === 'nb-fc' ? 'ARIMA' : 'NL→Data';
+      el.classList.add('real');
+    } else {
+      el.textContent = '🔒 Pro';
+      el.style.background = 'rgba(240,165,0,.1)';
+      el.style.color = 'var(--amber)';
+      el.style.border = '1px solid rgba(240,165,0,.2)';
+    }
+  });
+})();
+
+function logout(){
+  localStorage.removeItem('dp_token');
+  localStorage.removeItem('dp_user');
+  document.cookie = 'dp_token=; path=/; max-age=0';
+  window.location.href = '/';
+}
+
+function authHeader(){
+  const token = localStorage.getItem('dp_token');
+  return token ? {'Authorization': `Bearer ${token}`} : {};
+}
+
+// Override fetch for authenticated API calls
+const _origFetch = window.fetch;
+async function apiFetch(url, opts = {}){
+  // Inject auth header for our own API calls
+  if (url.startsWith(API) || url.startsWith('/')) {
+    opts.headers = {...(opts.headers || {}), ...authHeader()};
+  }
+  return _origFetch(url, opts);
+}
+const PAL = ['#5b8dee','#13e882','#f0506e','#f0a500','#8b5cf6','#22d3ee','#fb923c','#d946ef'];
+const CD = {
+  responsive:true, animation:{duration:500},
+  plugins:{legend:{labels:{color:'#7e8ab5',font:{size:10,family:"'JetBrains Mono'"},boxWidth:10}},
+    tooltip:{backgroundColor:'rgba(5,7,9,.95)',titleColor:'#e4e8f5',bodyColor:'#7e8ab5',borderColor:'rgba(91,141,238,.25)',borderWidth:1}},
+  scales:{
+    x:{ticks:{color:'#424d7a',font:{size:10},maxTicksLimit:10},grid:{color:'rgba(255,255,255,.03)'},border:{color:'transparent'}},
+    y:{ticks:{color:'#7e8ab5',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},border:{color:'transparent'}}
+  }
+};
+
+// ═══ UTILS ═══
+const Q = sel => document.querySelector(sel);
+const fmt = (v,d=3) => (v===null||v===undefined)?'—':typeof v==='number'?v.toFixed(d):v;
+const fmtK = v => v===null?'—':Math.abs(v)>=1e6?(v/1e6).toFixed(2)+'M':Math.abs(v)>=1e3?(v/1e3).toFixed(1)+'K':(typeof v==='number'?v.toFixed(2):v);
+function loading(msg){return`<div class="lbar"><div class="lfill"></div></div><div class="ltxt">${msg}</div>`}
+function errBox(m){return`<div class="alert aerr"><span>❌ ${m}</span></div>`}
+function toast(msg,t='ok'){const e=document.createElement('div');e.className=`alert a${t}`;e.style.cssText='position:fixed;bottom:1rem;right:1rem;z-index:9999;min-width:220px;max-width:380px;animation:fu .2s ease';e.innerHTML=msg;document.body.appendChild(e);setTimeout(()=>e.remove(),3000)}
+function mkChart(id,cfg){if(chartMap[id]){chartMap[id].destroy();delete chartMap[id]}const el=document.getElementById(id);if(!el)return null;const ch=new Chart(el,cfg);chartMap[id]=ch;return ch}
+
+// ═══ CONNECT ═══
+async function connect(){
+  // SID may have been changed by the session input
+  SID = Q('#api-sid')?.value?.trim() || SID || 'default';
+  const dot=Q('#dot'),txt=Q('#dottxt');
+  dot.className='dot';txt.textContent='Connecting…';
+  try{
+    const r=await fetch(`${API}/health`,{signal:AbortSignal.timeout(5000)});
+    const d=await r.json();
+    if(d.status==='ok'){
+      dot.className='dot on';
+      txt.textContent=`Online · sklearn ✓ · ${d.statsmodels?'ARIMA ✓':'statsmodels missing'}`;
+    }
+  }catch{
+    dot.className='dot off';
+    txt.textContent='Cannot reach server';
+  }
+}
+connect();setInterval(connect,15000);
+
+// ═══ NAV ═══
+const loaders={profile:loadProfile,eda:loadEDA,clean:loadClean,analyze:loadAnalyze,compare:()=>{}};
+function nav(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const id=el.dataset.p;
+  Q(`#panel-${id}`).classList.add('active');
+  if(loaders[id]&&uploadData)loaders[id]();
+}
+
+// ═══ UPLOAD ═══
+function handleDrop(e){e.preventDefault();Q('#uz').classList.remove('drag');const f=e.dataTransfer.files[0];if(f)upload(f)}
+async function upload(file){
+  if(!file)return;
+  const out=Q('#upload-out');
+  out.innerHTML=loading('Uploading → pandas parsing on FastAPI…');
+  const fd=new FormData();fd.append('file',file);
+
+  const token = localStorage.getItem('dp_token');
+  const endpoint = token ? `${API}/upload?session_id=${SID}` : `${API}/demo/upload`;
+
+  try{
+    const r = token
+      ? await apiFetch(`${API}/upload?session_id=${SID}`,{method:'POST',body:fd})
+      : await _origFetch(`${API}/demo/upload`,{method:'POST',body:fd});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.detail||'Upload failed');
+
+    // Handle locked (file too big for demo)
+    if(d.locked){
+      out.innerHTML=`<div class="alert aerr" style="margin-top:.85rem">
+        <span>⚠️ ${d.message}</span>
+        <a href="${d.upgrade_url||'/pricing'}" style="margin-left:12px;color:#fff;background:var(--accent);padding:3px 10px;border-radius:4px;text-decoration:none;font-size:11px;font-weight:700">Upgrade →</a>
+      </div>`;
+      return;
+    }
+
+    // In demo mode, map demo_id to SID
+    if(d.demo_id){
+      SID = d.demo_id;
+    } else {
+      SID = d.session_id || SID;
+    }
+
+    uploadData=d;edaCache=null;profileCache=null;
+    updateSession(d);wireControls(d);
+    out.innerHTML=renderUpload(d);
+
+    // Show paywall banner if row limit was hit in demo
+    if(d.paywall && d.paywall.triggered){
+      const banner = document.createElement('div');
+      banner.style.cssText='margin-top:.75rem;background:rgba(91,141,238,.08);border:1px solid rgba(91,141,238,.25);border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px';
+      banner.innerHTML=`<span style="font-size:12px;color:var(--text2)">📊 ${d.paywall.message}</span>
+        <a href="/pricing" style="color:#fff;background:var(--accent);padding:5px 14px;border-radius:5px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap">Upgrade to Pro →</a>`;
+      Q('#upload-out').appendChild(banner);
+    }
+
+    setTimeout(()=>{const pn=document.querySelector('[data-p="profile"]');if(pn)nav(pn)},700);
+  }catch(e){out.innerHTML=errBox(e.message)}
+}
+function renderUpload(d){
+  const cols=Object.keys(d.preview[0]||{});
+  return`<div class="alert aok" style="margin-top:.85rem"><span>✅ ${d.message}</span></div>
+    <div class="card"><div class="card-h"><div class="card-t">Preview</div></div>
+      <div class="sg">
+        <div class="s"><div class="sl">Rows</div><div class="sval">${d.rows.toLocaleString()}</div></div>
+        <div class="s"><div class="sl">Columns</div><div class="sval">${d.columns}</div></div>
+        <div class="s"><div class="sl">Session</div><div class="sval" style="font-size:13px">${SID}</div></div>
+      </div>
+      <div class="tw"><table class="dp"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>${d.preview.map(row=>`<tr>${cols.map(c=>`<td class="mono">${row[c]===null?'<em style="color:var(--text3)">null</em>':String(row[c]).substring(0,22)}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+function updateSession(d){
+  Q('#sesscard').style.display='';
+  Q('#sessbody').innerHTML=`
+    <div class="sr"><span class="sk">File</span><span class="sv">${d.filename.substring(0,16)}</span></div>
+    <div class="sr"><span class="sk">Rows</span><span class="sv">${d.rows.toLocaleString()}</span></div>
+    <div class="sr"><span class="sk">Cols</span><span class="sv">${d.columns}</span></div>
+    <div class="sr"><span class="sk">Session</span><span class="sv">${SID}</span></div>`;
+}
+function wireControls(d){
+  const cols=d.column_names||[];
+  ['ml-target','fc-target','ab-gcol'].forEach(id=>{const el=Q(`#${id}`);if(el)el.innerHTML=cols.map(c=>`<option value="${c}">${c}</option>`).join('')});
+  Q('#fc-date').innerHTML=`<option value="">— none —</option>`+cols.map(c=>`<option value="${c}">${c}</option>`).join('');
+  ['ml-btn','fc-btn','q-btn','ab-btn'].forEach(id=>{const b=Q(`#${id}`);if(b)b.disabled=false});
+  const n0=cols[0]||'col0',n1=cols[1]||'col1',c0=cols[2]||cols[0]||'cat';
+  Q('#q-chips').innerHTML=[`top 10 by ${n0}`,`correlation between ${n0} and ${n1}`,`describe ${n0}`,`filter ${n0} > 0`,`sum ${n0} by ${c0}`,`create column ratio = ${n0} / ${n1}`].map(s=>`<div class="chip" onclick="Q('#qi').value='${s}'">${s}</div>`).join('');
+}
+
+// ═══ PROFILE ═══
+async function loadProfile(){
+  const el=Q('#profile-out');
+  if(profileCache){renderProfile(profileCache,el);return}
+  el.innerHTML=loading('Deep profiling with pandas + scipy…');
+  try{
+    const url = DEMO_MODE ? `${API}/demo/profile?demo_id=${SID}` : `${API}/profile?session_id=${SID}`;
+    const r = DEMO_MODE ? await _origFetch(url) : await apiFetch(url);
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    profileCache=d;renderProfile(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderProfile(d,el){
+  const numCols  = d.num_cols  || d.columns.filter(c=>c.kind==='numeric').map(c=>c.column);
+  const catCols  = d.cat_cols  || d.columns.filter(c=>c.kind==='categorical').map(c=>c.column);
+  const dateCols = d.date_cols || d.columns.filter(c=>c.kind==='datetime').map(c=>c.column);
+  const memMB    = d.memory_mb != null ? d.memory_mb : '—';
+  const dupBadge=d.duplicate_rows>0?`<span class="b berr">${d.duplicate_rows.toLocaleString()} dupes</span>`:`<span class="b bok">No dupes</span>`;
+  let html=`<div class="sg">
+    <div class="s"><div class="sl">Rows</div><div class="sval">${d.total_rows.toLocaleString()}</div></div>
+    <div class="s"><div class="sl">Numeric</div><div class="sval">${numCols.length}</div></div>
+    <div class="s"><div class="sl">Categorical</div><div class="sval">${catCols.length}</div></div>
+    <div class="s"><div class="sl">Date cols</div><div class="sval">${dateCols.length}</div></div>
+    <div class="s"><div class="sl">Memory</div><div class="sval" style="font-size:14px">${memMB}MB</div></div>
+    <div class="s"><div class="sl">Duplicates</div><div class="sval" style="font-size:14px">${dupBadge}</div></div>
+  </div>
+  <div class="card"><div class="card-h"><div class="card-t">Column Detail</div><span class="b breal">pandas + scipy</span></div>
+    <div class="tw"><table class="dp"><thead><tr><th>Column</th><th>Kind</th><th>Nulls</th><th>Unique</th><th>Stats</th><th>Quality</th></tr></thead><tbody>`;
+  d.columns.forEach(col=>{
+    const nb=col.null_pct>30?`<span class="b berr">${col.null_pct}%</span>`:col.null_pct>5?`<span class="b bwarn">${col.null_pct}%</span>`:`<span class="b bok">${col.null_pct}%</span>`;
+    let stats='—',quality='<span class="b bok">Good</span>';
+    if(col.kind==='numeric'){
+      stats=`<span class="mono">μ=${fmt(col.mean,2)} σ=${fmt(col.std,2)}</span><br><span style="font-size:9px;color:var(--text3)">skew=${fmt(col.skewness,2)} · ${col.outlier_count} out</span>`;
+      quality=col.outlier_pct>10?`<span class="b bwarn">${col.outlier_pct}% out</span>`:col.is_normal?`<span class="b bok">Normal ✓</span>`:`<span class="b bneu">Non-normal</span>`;
+    }else if(col.kind==='categorical'){
+      stats=`<span class="mono">${col.unique_count} unique</span><br><span style="font-size:9px;color:var(--text3)">top: ${String(col.top_value||'').substring(0,12)} (${col.top_pct}%)</span>`;
+      if(col.unique_pct>90)quality=`<span class="b bwarn">High card.</span>`;
+    }else if(col.kind==='datetime'){stats=`<span class="mono">${col.range_days}d range</span>`}
+    if(col.null_pct>50)quality=`<span class="b berr">Sparse</span>`;
+    html+=`<tr><td><strong class="mono">${col.column}</strong></td><td><span class="b bneu">${col.kind}</span></td><td>${nb}</td><td class="mono">${col.unique_count.toLocaleString()}</td><td>${stats}</td><td>${quality}</td></tr>`;
+  });
+  html+=`</tbody></table></div></div>`;
+  // Heatmap
+  if(d.correlations&&Object.keys(d.correlations).length>1){
+    const cols=Object.keys(d.correlations);
+    html+=`<div class="card"><div class="card-h"><div class="card-t">Correlation Heatmap</div><span class="b bblue">Pearson r</span></div>
+      <div class="hm-wrap"><table class="hm-table"><thead><tr><th class="hm-hdr"></th>`;
+    cols.forEach(c=>{html+=`<th class="hm-hdr" title="${c}">${c.substring(0,7)}</th>`});
+    html+=`</tr></thead><tbody>`;
+    cols.forEach(r=>{
+      html+=`<tr><th class="hm-hdr" style="text-align:right;padding-right:6px">${r.substring(0,7)}</th>`;
+      cols.forEach(c=>{
+        const v=d.correlations[r]?.[c];
+        if(v===null||v===undefined){html+=`<td><div class="hm-cell" style="background:var(--bg4)">—</div></td>`;return}
+        const abs=Math.abs(v);
+        const bg=v>0?`rgba(91,141,238,${(abs*.85).toFixed(2)})`:`rgba(240,80,110,${(abs*.85).toFixed(2)})`;
+        html+=`<td><div class="hm-cell" style="background:${bg};color:${abs>0.5?'#fff':'var(--text3)'}" title="${r}×${c}: ${v.toFixed(4)}">${r===c?'1.00':v.toFixed(2)}</div></td>`;
+      });
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+  el.innerHTML=html;
+}
+
+// ═══ EDA CHARTS ═══
+async function loadEDA(){
+  const el=Q('#eda-out');
+  if(edaCache){renderEDA(edaCache,el);return}
+  el.innerHTML=loading('Computing EDA on backend — histograms · scatter · box plots…');
+  try{
+    const url = DEMO_MODE ? `${API}/demo/eda?demo_id=${SID}` : `${API}/eda?session_id=${SID}&max_scatter=600`;
+    const r = DEMO_MODE ? await _origFetch(url) : await apiFetch(url);
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    edaCache=d;renderEDA(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderEDA(d,el){
+  const eda=d.eda||{};
+  let html=`<div class="cgrid">`;
+  Object.entries(eda.histograms||{}).forEach(([col,h],i)=>{
+    const n = h.n != null ? h.n.toLocaleString() : '—';
+    const std = h.std != null ? fmt(h.std,2) : '—';
+    const symNote = h.std != null ? (Math.abs(h.mean-(h.median||0))<h.std*0.2?' — approximately symmetric':' — skewed distribution') : '';
+    html+=`<div class="cbox"><div class="ct">Distribution — ${col}</div><div class="cs">n=${n} · μ=${fmt(h.mean,2)} · σ=${std}</div><canvas id="h${i}" height="90"></canvas><div class="cins">Median=${fmt(h.median,2)}, Mean=${fmt(h.mean,2)}${symNote}.</div></div>`;
+  });
+  (eda.scatters||[]).forEach((sc,i)=>{
+    const r2 = sc.r2 != null ? sc.r2 : '—';
+    const n  = sc.n  != null ? sc.n  : '—';
+    html+=`<div class="cbox"><div class="ct">${sc.x_col} vs ${sc.y_col}</div><div class="cs">r=${sc.r} · R²=${r2} · n=${n} points</div><canvas id="sc${i}" height="90"></canvas><div class="cins">${Math.abs(sc.r)>0.7?'Strong':Math.abs(sc.r)>0.4?'Moderate':'Weak'} ${sc.r>=0?'positive':'negative'} linear relationship (r=${sc.r}).</div></div>`;
+  });
+  (eda.cat_charts||[]).forEach((cc,i)=>{
+    const uniqueCount = cc.unique != null ? cc.unique : (cc.labels||[]).length;
+    html+=`<div class="cbox"><div class="ct">${cc.col} — Frequency</div><div class="cs">${uniqueCount} unique values</div><canvas id="cat${i}" height="90"></canvas></div>`;
+  });
+  if((eda.box_data||[]).length>1){
+    html+=`<div class="cbox cboxfull"><div class="ct">Box Plots — Numeric Columns</div><div class="cs">IQR · whiskers · Tukey 1.5× fence</div><canvas id="boxc" height="70"></canvas></div>`;
+  }
+  if(eda.correlation_matrix){
+    const cm=eda.correlation_matrix;
+    html+=`<div class="cbox cboxfull"><div class="ct">Correlation Matrix</div><div class="cs">${cm.cols.length} numeric columns · Pearson r</div>
+      <div class="hm-wrap"><table class="hm-table"><thead><tr><th class="hm-hdr"></th>`;
+    cm.cols.forEach(c=>{html+=`<th class="hm-hdr" title="${c}">${c.substring(0,8)}</th>`});
+    html+=`</tr></thead><tbody>`;
+    cm.cols.forEach((r,ri)=>{
+      html+=`<tr><th class="hm-hdr" style="text-align:right;padding-right:6px">${r.substring(0,8)}</th>`;
+      cm.cols.forEach((_,ci)=>{
+        const v=cm.matrix[ri]?.[ci];
+        if(v===null||v===undefined){html+=`<td><div class="hm-cell" style="background:var(--bg4)">—</div></td>`;return}
+        const abs=Math.abs(v);
+        const bg=v>0?`rgba(91,141,238,${(abs*.85).toFixed(2)})`:`rgba(240,80,110,${(abs*.85).toFixed(2)})`;
+        html+=`<td><div class="hm-cell" style="background:${bg};color:${abs>0.5?'#fff':'var(--text3)'}">${ri===ci?'1.00':v.toFixed(2)}</div></td>`;
+      });
+      html+=`</tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  }
+  if(eda.time_series){
+    const ts=eda.time_series;
+    html+=`<div class="cbox cboxfull"><div class="ct">Time Series — ${ts.val_col}</div><div class="cs">${ts.n||ts.dates?.length||''} periods · rolling average</div><canvas id="tsc" height="70"></canvas></div>`;
+  }
+  html+=`</div>`;
+  el.innerHTML=html;
+  requestAnimationFrame(()=>{
+    Object.entries(eda.histograms||{}).forEach(([col,h],i)=>{
+      // Full EDA has kde+centers; demo has just counts+edges
+      if(h.centers && h.kde){
+        mkChart(`h${i}`,{type:'bar',data:{labels:h.centers.map(v=>fmt(v,1)),datasets:[{type:'bar',label:'Count',data:h.counts,backgroundColor:'rgba(91,141,238,.5)',borderRadius:2,order:2},{type:'line',label:'KDE',data:h.kde,borderColor:'#d946ef',borderWidth:2,pointRadius:0,fill:false,tension:.5,order:1,yAxisID:'kde'}]},options:{...CD,plugins:{...CD.plugins,legend:{...CD.plugins.legend,labels:{...CD.plugins.legend.labels,filter:it=>it.datasetIndex===1}}},scales:{x:{...CD.scales.x,ticks:{...CD.scales.x.ticks,maxTicksLimit:8}},y:CD.scales.y,kde:{display:false}}}});
+      } else {
+        // Demo: simple bar chart from edges
+        const labels = (h.edges||[]).slice(0,-1).map((v,i)=>fmt((v+(h.edges[i+1]||v))/2,1));
+        mkChart(`h${i}`,{type:'bar',data:{labels,datasets:[{label:'Count',data:h.counts,backgroundColor:'rgba(91,141,238,.5)',borderRadius:2}]},options:{...CD,plugins:{...CD.plugins,legend:{display:false}},scales:{x:{...CD.scales.x,ticks:{...CD.scales.x.ticks,maxTicksLimit:8}},y:CD.scales.y}}});
+      }
+    });
+    (eda.scatters||[]).forEach((sc,i)=>{
+      const ds=[{label:'Data',data:sc.points,backgroundColor:'rgba(91,141,238,.4)',pointRadius:3.5}];
+      if(sc.regression)ds.push({label:`R²=${sc.r2||''}`,type:'line',data:[{x:sc.regression.x[0],y:sc.regression.y[0]},{x:sc.regression.x[1],y:sc.regression.y[1]}],borderColor:'#f0506e',borderWidth:2,pointRadius:0,fill:false,borderDash:[5,3]});
+      mkChart(`sc${i}`,{type:'scatter',data:{datasets:ds},options:{...CD,scales:{x:{...CD.scales.x,title:{display:true,text:sc.x_col,color:'#7e8ab5',font:{size:10}}},y:{...CD.scales.y,title:{display:true,text:sc.y_col,color:'#7e8ab5',font:{size:10}}}}}});
+    });
+    (eda.cat_charts||[]).forEach((cc,i)=>{
+      mkChart(`cat${i}`,{type:'bar',data:{labels:cc.labels.map(l=>String(l).substring(0,14)),datasets:[{label:'Count',data:cc.counts,backgroundColor:PAL.map(c=>c+'99'),borderRadius:3}]},options:{...CD,indexAxis:'y',plugins:{...CD.plugins,legend:{display:false}}}});
+    });
+    if((eda.box_data||[]).length>1){
+      const bd=eda.box_data;
+      mkChart('boxc',{type:'bar',data:{labels:bd.map(d=>d.col.substring(0,12)),datasets:[{label:'Min→Q1',data:bd.map(d=>d.q1-d.min),backgroundColor:'rgba(91,141,238,.15)',stack:'b',borderWidth:0},{label:'Q1→Med',data:bd.map(d=>d.median-d.q1),backgroundColor:'rgba(91,141,238,.6)',stack:'b',borderWidth:0},{label:'Med→Q3',data:bd.map(d=>d.q3-d.median),backgroundColor:'rgba(19,232,130,.6)',stack:'b',borderWidth:0},{label:'Q3→Max',data:bd.map(d=>d.max-d.q3),backgroundColor:'rgba(19,232,130,.15)',stack:'b',borderWidth:0}]},options:{...CD,plugins:{...CD.plugins,tooltip:{...CD.plugins.tooltip,mode:'index',callbacks:{afterBody:items=>{const idx=items[0]?.dataIndex;if(idx==null)return[];const d=bd[idx];return[`─────`,`Min: ${fmt(d.min)}`,`Q1:  ${fmt(d.q1)}`,`Med: ${fmt(d.median)}`,`Q3:  ${fmt(d.q3)}`,`Max: ${fmt(d.max)}`,`Mean:${fmt(d.mean)}`]},label:()=>null}}},scales:{x:{...CD.scales.x,stacked:true},y:{...CD.scales.y,stacked:true}}}});
+    }
+    if(eda.time_series){
+      const ts=eda.time_series;
+      mkChart('tsc',{type:'line',data:{labels:ts.dates,datasets:[{label:ts.val_col,data:ts.values,borderColor:'#5b8dee',borderWidth:2,pointRadius:0,fill:true,backgroundColor:'rgba(91,141,238,.06)',tension:.3},{label:'Rolling avg',data:ts.rolling,borderColor:'#13e882',borderWidth:2,borderDash:[4,3],pointRadius:0,fill:false,tension:.3}]},options:{...CD,interaction:{mode:'index',intersect:false}}});
+    }
+  });
+}
+
+// ═══ CLEAN ═══
+let selOps=[];
+async function loadClean(){
+  const el=Q('#clean-out');
+  el.innerHTML=loading('Analysing data quality…');
+  try{
+    const url = DEMO_MODE ? `${API}/demo/profile?demo_id=${SID}` : `${API}/profile?session_id=${SID}`;
+    const r = DEMO_MODE ? await _origFetch(url) : await apiFetch(url);
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    renderClean(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderClean(prof,el){
+  const sugg=[];
+  if(prof.duplicate_rows>0)sugg.push({op:'drop_duplicates',name:'Remove Duplicates',desc:`${prof.duplicate_rows} duplicate rows detected`,color:'var(--red)'});
+  prof.columns.forEach(col=>{
+    if(col.null_count>0){const method=col.kind==='numeric'?'median':'mode';sugg.push({op:'impute',col:col.column,method,name:`Impute "${col.column}"`,desc:`${col.null_count} nulls (${col.null_pct}%) → fill with ${method}`,color:col.null_pct>20?'var(--red)':'var(--amber)'})}
+    if(col.kind==='numeric'&&col.outlier_pct>10)sugg.push({op:'remove_outliers',col:col.column,method:'iqr',name:`Remove outliers in "${col.column}"`,desc:`${col.outlier_count} outliers (${col.outlier_pct}%) — IQR method`,color:'var(--amber)'});
+  });
+  let opsHtml=sugg.length?sugg.map((s,i)=>`<div class="opi" id="opi${i}" onclick="toggleOp(${i},${JSON.stringify(s).replace(/"/g,'&quot;')})"><div class="opck" id="opck${i}"></div><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">${s.name}</div><div style="font-size:10px;color:var(--text3)">${s.desc}</div></div><span style="font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:3px;background:${s.color}22;color:${s.color};border:1px solid ${s.color}44">Auto</span></div>`).join(''):'<div class="alert aok">✅ No obvious issues found.</div>';
+  el.innerHTML=`<div class="card"><div class="card-h"><div class="card-t">🧹 Suggested</div><span class="b breal">pandas</span></div>${opsHtml}
+    <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <div class="card-t" style="margin-bottom:.5rem">Custom Operation</div>
+      <div class="fr">
+        <div class="fg"><label class="fl">Operation</label>
+          <select class="fi" id="cop-type"><option value="">— select —</option><option value="create_column">Create column</option><option value="filter_rows">Filter rows</option><option value="normalize">Normalize</option><option value="drop_column">Drop column</option></select></div>
+        <div class="fg"><label class="fl">Column</label><input class="fi" id="cop-col" placeholder="column name"></div>
+        <div class="fg"><label class="fl">Value / Expression</label><input class="fi" id="cop-expr" placeholder="e.g. revenue - cost"></div>
+        <div class="fg" style="justify-content:flex-end"><label class="fl">&nbsp;</label><button class="btn btns" style="padding:6px 12px;font-size:10px" onclick="addCOp()">+ Add</button></div>
+      </div>
+    </div>
+    <button class="btn btnp" style="margin-top:.5rem" onclick="runClean()">Apply Selected Ops</button>
+  </div><div id="clean-res"></div>`;
+  selOps=[];
+}
+function toggleOp(i,op){const el=Q(`#opi${i}`),ck=Q(`#opck${i}`);const idx=selOps.findIndex(o=>o.op===op.op&&o.col===op.col);if(idx===-1){selOps.push(op);el.classList.add('sel');ck.textContent='✓'}else{selOps.splice(idx,1);el.classList.remove('sel');ck.textContent=''}}
+function addCOp(){const type=Q('#cop-type').value,col=Q('#cop-col').value.trim(),expr=Q('#cop-expr').value.trim();if(!type)return toast('Select an operation','awarn');selOps.push({op:type,col,expr,name:col,method:expr,old:col,new:expr});toast(`✓ Added: ${type}${col?' on '+col:''}`);}
+async function runClean(){
+  if(!selOps.length){toast('Select at least one operation');return}
+  const el=Q('#clean-res');el.innerHTML=loading('Running pandas operations on backend…');
+  try{
+    const r=await apiFetch(`${API}/clean`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:SID,operations:selOps})});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    profileCache=null;edaCache=null;
+    el.innerHTML=`<div class="card" style="margin-top:.85rem"><div class="card-h"><div class="card-t">Results</div></div>
+      <div class="sg"><div class="s"><div class="sl">Ops</div><div class="sval">${d.operations_applied}</div></div><div class="s"><div class="sl">Rows removed</div><div class="sval" style="color:${d.rows_removed>0?'var(--red)':'var(--text)'}">${d.rows_removed.toLocaleString()}</div></div><div class="s"><div class="sl">Nulls fixed</div><div class="sval" style="color:var(--green)">${d.nulls_fixed.toLocaleString()}</div></div><div class="s"><div class="sl">Remaining</div><div class="sval">${d.rows_after.toLocaleString()}</div></div></div>
+      <div class="log">${d.log.map(l=>`<div class="${l.startsWith('✅')?'ok':'err'}">${l}</div>`).join('')}</div></div>`;
+    selOps=[];
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+
+// ═══ ANALYZE ═══
+async function loadAnalyze(){
+  const el=Q('#analyze-out');
+  el.innerHTML=loading('Running: ANOVA · chi-square · normality tests · time series…');
+  try{
+    const r=await apiFetch(`${API}/analyze?session_id=${SID}`);
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    renderAnalyze(d.analysis,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderAnalyze(a,el){
+  let html='';
+  if(a.correlations?.top_pairs?.length){
+    html+=`<div class="card"><div class="card-h"><div class="card-t">🔗 Top Correlations</div><span class="b bblue">Pearson r</span></div><div class="tw"><table class="dp"><thead><tr><th>Col 1</th><th>Col 2</th><th>r</th><th>R²</th><th>Strength</th><th>Dir.</th></tr></thead><tbody>`;
+    a.correlations.top_pairs.slice(0,12).forEach(p=>{const cls=p.strength==='strong'?'bok':p.strength==='moderate'?'bwarn':'bneu';html+=`<tr><td class="mono">${p.col1}</td><td class="mono">${p.col2}</td><td class="mono" style="color:${p.r>=0?'var(--accent)':'var(--red)'}">${p.r}</td><td class="mono">${p.r_squared}</td><td><span class="b ${cls}">${p.strength}</span></td><td><span class="b ${p.direction==='positive'?'bblue':'berr'}">${p.direction}</span></td></tr>`});
+    html+=`</tbody></table></div></div>`;
+  }
+  if(a.anova?.length){
+    html+=`<div class="card"><div class="card-h"><div class="card-t">📊 ANOVA</div><span class="b breal">scipy.f_oneway</span></div><div class="tw"><table class="dp"><thead><tr><th>Numeric</th><th>Group By</th><th>F-stat</th><th>p-value</th><th>Sig.</th></tr></thead><tbody>`;
+    a.anova.forEach(x=>{html+=`<tr><td class="mono">${x.numeric_col}</td><td class="mono">${x.groupby_col}</td><td class="mono">${fmt(x.f_statistic)}</td><td class="mono">${fmt(x.p_value,4)}</td><td>${x.significant?'<span class="b bok">p&lt;0.05 ✓</span>':'<span class="b bneu">Not sig.</span>'}</td></tr>`});
+    html+=`</tbody></table></div></div>`;
+  }
+  if(a.distribution_tests?.length){
+    html+=`<div class="card"><div class="card-h"><div class="card-t">📐 Normality Tests</div><span class="b breal">Shapiro-Wilk</span></div><div class="tw"><table class="dp"><thead><tr><th>Column</th><th>Normal?</th><th>p-value</th><th>Skewness</th><th>Kurtosis</th><th>Rec. test</th></tr></thead><tbody>`;
+    a.distribution_tests.forEach(t=>{html+=`<tr><td class="mono">${t.col}</td><td>${t.is_normal?'<span class="b bok">Normal ✓</span>':'<span class="b bwarn">Non-normal</span>'}</td><td class="mono">${fmt(t.normality_p,4)}</td><td class="mono">${fmt(t.skewness)}</td><td class="mono">${fmt(t.kurtosis)}</td><td><span class="b bblue">${t.recommended_test}</span></td></tr>`});
+    html+=`</tbody></table></div></div>`;
+  }
+  if(a.chi_square?.length){
+    html+=`<div class="card"><div class="card-h"><div class="card-t">χ² Chi-Square</div><span class="b breal">scipy.stats</span></div><div class="tw"><table class="dp"><thead><tr><th>Col 1</th><th>Col 2</th><th>χ²</th><th>p-val</th><th>Cramér's V</th><th>Effect</th></tr></thead><tbody>`;
+    a.chi_square.forEach(c=>{html+=`<tr><td class="mono">${c.col1}</td><td class="mono">${c.col2}</td><td class="mono">${fmt(c.chi2)}</td><td class="mono">${fmt(c.p_value,4)}</td><td class="mono">${fmt(c.cramers_v)}</td><td><span class="b ${c.effect==='strong'?'bok':c.effect==='moderate'?'bwarn':'bneu'}">${c.effect}</span></td></tr>`});
+    html+=`</tbody></table></div></div>`;
+  }
+  if(a.time_series?.trend?.length){
+    html+=`<div class="card"><div class="card-h"><div class="card-t">📈 Time Series Decomposition</div><span class="b breal">statsmodels</span></div><div class="alert ai">Trend: <strong style="color:var(--text)">${a.time_series.trend_direction==='up'?'▲ Upward':'▼ Downward'}</strong> · ${a.time_series.periods} periods</div><canvas id="ts-dc" height="70"></canvas></div>`;
+    setTimeout(()=>{const ts=a.time_series;mkChart('ts-dc',{type:'line',data:{labels:ts.dates,datasets:[{label:'Trend',data:ts.trend,borderColor:'#5b8dee',borderWidth:2,pointRadius:0,fill:false,tension:.3},{label:'Seasonal',data:ts.seasonal,borderColor:'#8b5cf6',borderWidth:1.5,pointRadius:0,fill:false,tension:.3,borderDash:[3,3]}]},options:CD})},80);
+  }
+  if(!html)html='<div class="alert awarn"><span>⚠️ Need at least 2 numeric or 2 categorical columns for statistical tests.</span></div>';
+  el.innerHTML=html;
+}
+
+// ═══ ML ═══
+function mlConfig(){
+  const t=Q('#ml-type').value;
+  Q('#ml-tg').style.display=t==='kmeans'?'none':'';
+  Q('#ml-kg').style.display=t==='kmeans'?'':'none';
+  Q('#ml-extras').style.display=['random_forest_reg','random_forest_clf','gradient_boosting','kmeans'].includes(t)?'grid':'none';
+}
+mlConfig();
+async function runML(){
+  const type=Q('#ml-type').value,target=Q('#ml-target').value,split=parseFloat(Q('#ml-split').value),nEst=parseInt(Q('#ml-nest').value)||100,k=parseInt(Q('#ml-k').value)||3;
+  const el=Q('#ml-out');el.innerHTML=loading('Training with scikit-learn… computing metrics on held-out test set');
+  try{
+    const r=await apiFetch(`${API}/train-model`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:SID,model_type:type,target_col:type!=='kmeans'?target:null,params:{test_size:split,n_estimators:nEst,k}})});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    renderML(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderML(d,el){
+  const metrics=d.metrics||{};
+  let html=`<div class="card" style="margin-top:.85rem"><div class="card-h"><div class="card-t">🤖 ${d.model_type.replace(/_/g,' ').toUpperCase()}</div><span class="b breal">scikit-learn</span></div>`;
+  if(d.train_size)html+=`<div class="alert ai">Train: <strong>${d.train_size.toLocaleString()}</strong> · Test holdout: <strong>${d.test_size_n.toLocaleString()}</strong> · Real out-of-sample metrics</div>`;
+  if(Object.keys(metrics).length)html+=`<div class="mg">${Object.entries(metrics).map(([k,v])=>`<div class="m"><div class="ml">${k.replace(/_/g,' ')}</div><div class="mv">${typeof v==='number'&&v.toFixed?v.toFixed(4):v}</div></div>`).join('')}</div>`;
+  if(d.interpretation)html+=`<div class="ibox"><div class="ibox-l">📌 Interpretation</div><div class="ibox-t">${d.interpretation}</div></div>`;
+  const fi=d.feature_importance||d.coefficients;
+  if(fi){const entries=Object.entries(fi);const mx=Math.max(...entries.map(([,v])=>Math.abs(v)));html+=`<div style="margin-top:.85rem"><div class="card-t" style="margin-bottom:.5rem">Feature Importance</div>`;entries.slice(0,12).forEach(([col,val])=>{const pct=mx>0?(Math.abs(val)/mx*100).toFixed(1):0;html+=`<div class="fir"><div class="fil" title="${col}">${col}</div><div class="fibw"><div class="fibf" style="width:${pct}%;${val<0?'background:linear-gradient(90deg,var(--red),var(--pink))':''}"></div></div><div class="fiv">${typeof val==='number'&&val.toFixed?val.toFixed(4):val}</div></div>`});html+=`</div>`;}
+  if(d.actual_vs_predicted?.length)html+=`<div style="margin-top:.85rem"><canvas id="avp" height="70"></canvas></div>`;
+  if(d.pca_coords&&d.cluster_labels){html+=`<div style="margin-top:.85rem"><canvas id="clust" height="80"></canvas>`;if(d.elbow_inertias)html+=`<canvas id="elbow" height="50" style="margin-top:.85rem"></canvas>`;html+=`</div>`;}
+  if(d.confusion_matrix){html+=`<div style="margin-top:.85rem"><div class="card-t" style="margin-bottom:.5rem">Confusion Matrix</div><div class="tw"><table class="dp"><thead><tr><th></th>${d.classes.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;d.confusion_matrix.forEach((row,i)=>{html+=`<tr><th class="mono" style="background:var(--bg3)">${d.classes[i]}</th>${row.map((v,j)=>`<td class="mono" style="text-align:center;background:${i===j?'rgba(19,232,130,.1)':'var(--bg3)'};color:${i===j?'var(--green)':'var(--text2)'}">${v}</td>`).join('')}</tr>`});html+=`</tbody></table></div></div>`;}
+  html+=`</div>`;el.innerHTML=html;
+  setTimeout(()=>{
+    if(d.actual_vs_predicted?.length)mkChart('avp',{type:'scatter',data:{datasets:[{label:'Actual vs Predicted',data:d.actual_vs_predicted.map(p=>({x:p.actual,y:p.predicted})),backgroundColor:'rgba(91,141,238,.4)',pointRadius:3.5}]},options:{...CD,scales:{x:{...CD.scales.x,title:{display:true,text:'Actual',color:'#7e8ab5'}},y:{...CD.scales.y,title:{display:true,text:'Predicted',color:'#7e8ab5'}}}}});
+    if(d.pca_coords&&d.cluster_labels){const k=Math.max(...d.cluster_labels)+1;mkChart('clust',{type:'scatter',data:{datasets:Array.from({length:k},(_,ci)=>({label:`C${ci+1}`,data:d.pca_coords.filter((_,i)=>d.cluster_labels[i]===ci).map(p=>({x:p[0],y:p[1]})),backgroundColor:PAL[ci]+'88',pointRadius:4}))},options:{...CD,scales:{x:{...CD.scales.x,title:{display:true,text:'PC1',color:'#7e8ab5'}},y:{...CD.scales.y,title:{display:true,text:'PC2',color:'#7e8ab5'}}}}});if(d.elbow_inertias)mkChart('elbow',{type:'line',data:{labels:d.elbow_k,datasets:[{label:'Inertia (Elbow Method)',data:d.elbow_inertias,borderColor:'#5b8dee',borderWidth:2,pointRadius:5,fill:false,tension:.2,pointBackgroundColor:'#5b8dee'}]},options:CD});}
+  },80);
+}
+
+// ═══ FORECAST ═══
+async function runForecast(){
+  const target=Q('#fc-target').value,dc=Q('#fc-date').value,periods=parseInt(Q('#fc-periods').value)||8;
+  const el=Q('#fc-out');el.innerHTML=loading('Running ARIMA + Holt-Winters ETS… AIC selection…');
+  try{
+    const r=await apiFetch(`${API}/forecast`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:SID,target_col:target,date_col:dc||null,periods})});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    renderForecast(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderForecast(d,el){
+  const bestAIC=d.model_comparison?.[d.best_model]?.aic;
+  let html=`<div class="card" style="margin-top:.85rem"><div class="card-h"><div class="card-t">📈 ${d.target_col}</div><span class="b breal">${(d.method||'').toUpperCase()}</span></div>
+    <div class="alert aok">Best: <strong>${(d.best_model||'').toUpperCase()}</strong>${bestAIC?` · AIC: ${bestAIC.toFixed(2)}`:''} · ${d.periods} periods · 95% CI</div>
+    <canvas id="fcc" height="90"></canvas>`;
+  if(d.forecast?.length){html+=`<div style="margin-top:.85rem"><div class="card-t" style="margin-bottom:.5rem">Forecast Table</div><div class="tw"><table class="dp"><thead><tr><th>Period</th><th>Forecast</th><th>95% Low</th><th>95% High</th></tr></thead><tbody>`;d.forecast.forEach(f=>{html+=`<tr><td class="mono">${String(f.date).substring(0,10)}</td><td class="mono" style="color:var(--green);font-weight:700">${fmt(f.value,4)}</td><td class="mono" style="color:var(--text3)">${fmt(f.lo,4)}</td><td class="mono" style="color:var(--text3)">${fmt(f.hi,4)}</td></tr>`});html+=`</tbody></table></div></div>`;}
+  html+=`</div>`;el.innerHTML=html;
+  setTimeout(()=>{
+    const hist=d.historical||[],fc=d.forecast||[];
+    const hD=hist.map(h=>String(h.date).substring(0,10)),hV=hist.map(h=>h.value);
+    const fD=fc.map(f=>String(f.date).substring(0,10)),fV=fc.map(f=>f.value),fLo=fc.map(f=>f.lo),fHi=fc.map(f=>f.hi);
+    const gap=Array(hD.length).fill(null);
+    mkChart('fcc',{type:'line',data:{labels:[...hD,...fD],datasets:[{label:'Historical',data:[...hV,...Array(fD.length).fill(null)],borderColor:'#5b8dee',borderWidth:2.5,pointRadius:0,fill:true,backgroundColor:'rgba(91,141,238,.05)',tension:.3},{label:'Forecast',data:[...gap,...fV],borderColor:'#13e882',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#13e882',borderDash:[6,4],fill:false},{label:'CI High',data:[...gap,...fHi],borderColor:'rgba(19,232,130,.2)',borderWidth:1,pointRadius:0,fill:'+1',backgroundColor:'rgba(19,232,130,.07)'},{label:'CI Low',data:[...gap,...fLo],borderColor:'rgba(19,232,130,.15)',borderWidth:1,pointRadius:0,fill:false}]},options:{...CD,interaction:{mode:'index',intersect:false},plugins:{...CD.plugins,legend:{...CD.plugins.legend,labels:{...CD.plugins.legend.labels,filter:i=>!i.text.startsWith('CI')}}}}});
+  },80);
+}
+
+// ═══ QUERY ═══
+async function runQuery(){
+  const q=Q('#qi').value.trim();if(!q)return;
+  const hist=Q('#q-hist'),stamp=Date.now(),id=`qr${stamp}`;
+  hist.insertAdjacentHTML('afterbegin',`<div class="qr" id="${id}"><div class="qop">$ ${q}</div><div class="think"><span></span><span></span><span></span></div></div>`);
+  try{
+    const r=await apiFetch(`${API}/query`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:SID,query:q})});
+    const d=await r.json();
+    if(d.operation!=='unknown'&&d.result){renderQResult(id,d);Q('#qi').value='';return}
+    await runClaudeQuery(id,q,d);
+  }catch(e){const el=document.getElementById(id);if(el)el.innerHTML=`<div class="qop">$ ${q}</div><div class="alert aerr"><span>❌ ${e.message}</span></div>`;}
+  Q('#qi').value='';
+}
+async function runClaudeQuery(id,q,backendResp){
+  let context='Dataset not loaded.';
+  if(uploadData){context=`Dataset: ${uploadData.rows} rows × ${uploadData.columns} columns. Columns: ${uploadData.column_names.join(', ')}.`;if(profileCache){const ns=profileCache.columns.filter(c=>c.kind==='numeric').slice(0,5).map(c=>`${c.column}(μ=${c.mean?.toFixed(2)||'?'},σ=${c.std?.toFixed(2)||'?'})`).join(', ');context+=` Numeric stats: ${ns}.`;}}
+  try{
+    const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:`You are a data analyst assistant. User has this dataset: ${context}\n\nAnswer queries with specific numbers from the data. Respond in JSON: {"type":"answer","content":"..."} or {"type":"operation","op":"filter_rows","expr":"...","explanation":"..."}. Only valid JSON, no markdown.`,messages:[{role:'user',content:q}]})});
+    const data=await response.json();
+    const text=data.content?.[0]?.text||'';
+    let parsed;try{parsed=JSON.parse(text.replace(/```json|```/g,'').trim())}catch{parsed={type:'answer',content:text}}
+    const el=document.getElementById(id);if(!el)return;
+    if(parsed.type==='operation'){el.innerHTML=`<div class="qop aibadge">✦ Claude → ${parsed.op}</div><div class="qex">${parsed.explanation||''}</div><div class="alert ai"><span>Suggested: <code class="mono">${parsed.op}: ${parsed.expr||''}</code></span></div>`}
+    else{el.innerHTML=`<div class="qop aibadge">✦ Claude Analysis</div><div class="qex" style="color:var(--text);line-height:1.7">${parsed.content||text}</div>`}
+  }catch(e){
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=`<div class="qop">$ ${q}</div><div class="qex" style="color:var(--text3)">Couldn't parse this query. Try:</div><div class="chips">${(backendResp?.suggestions||[]).map(s=>`<div class="chip" onclick="Q('#qi').value='${s}'">${s}</div>`).join('')}</div>`;
+  }
+}
+function renderQResult(id,d){
+  const el=document.getElementById(id);if(!el)return;
+  let rhtml='';
+  if(d.result?.data){const rows=d.result.data.slice(0,15);const cols=d.result.columns||Object.keys(rows[0]||{});rhtml=`<div class="tw"><table class="dp"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td class="mono">${r[c]===null?'—':String(r[c]).substring(0,22)}</td>`).join('')}</tr>`).join('')}</tbody></table></div><div style="font-size:9px;color:var(--text3);margin-top:5px;font-family:var(--mono)">${d.result.rows.toLocaleString()} rows × ${d.result.cols} cols</div>`;}
+  else if(d.result&&typeof d.result==='object'){rhtml=`<div class="tw"><table class="dp"><tbody>${Object.entries(d.result).map(([k,v])=>`<tr><td class="mono" style="color:var(--text3)">${k}</td><td class="mono">${typeof v==='number'&&v.toFixed?v.toFixed(4):v}</td></tr>`).join('')}</tbody></table></div>`;}
+  el.innerHTML=`<div class="qop">$ ${d.operation}</div><div class="qex">${d.explanation}</div>${rhtml}`;
+}
+
+// ═══ A/B COMPARE ═══
+async function loadABGroups(){
+  const col=Q('#ab-gcol').value;if(!col||!uploadData)return;
+  try{
+    const r=await apiFetch(`${API}/data?session_id=${SID}&limit=2000`);
+    const d=await r.json();
+    const vals=[...new Set(d.rows.map(row=>row[col]).filter(v=>v!==null&&v!==undefined))].sort();
+    ['ab-ga','ab-gb'].forEach((id,i)=>{Q(`#${id}`).innerHTML=vals.map(v=>`<option value="${v}">${v}</option>`).join('');if(i===1&&vals.length>1)Q(`#${id}`).selectedIndex=1});
+  }catch{}
+}
+async function runCompare(){
+  const gcol=Q('#ab-gcol').value,ga=Q('#ab-ga').value,gb=Q('#ab-gb').value;
+  const el=Q('#ab-out');
+  if(ga===gb){toast('Choose two different groups');return}
+  el.innerHTML=loading('Running Welch\'s t-tests + Cohen\'s d effect sizes…');
+  try{
+    const r=await apiFetch(`${API}/compare`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({session_id:SID,group_col:gcol,group_a:ga,group_b:gb})});
+    const d=await r.json();if(!r.ok)throw new Error(d.detail);
+    renderCompare(d,el);
+  }catch(e){el.innerHTML=errBox(e.message)}
+}
+function renderCompare(d,el){
+  let html=`<div class="card" style="margin-top:.85rem"><div class="card-h"><div class="card-t">⚖️ ${d.group_a} vs ${d.group_b}</div><span class="b breal">Welch t-test</span></div>
+    <div class="sg"><div class="s"><div class="sl">${d.group_a}</div><div class="sval">${d.a_rows.toLocaleString()}</div></div><div class="s"><div class="sl">${d.group_b}</div><div class="sval">${d.b_rows.toLocaleString()}</div></div><div class="s"><div class="sl">Sig. diffs</div><div class="sval">${d.comparisons.filter(c=>c.significant).length}</div></div></div>
+    <div class="abrow" style="font-family:var(--mono);font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.08em"><div class="abcol">Metric</div><div class="aba">${d.group_a}</div><div class="abb">${d.group_b}</div><div class="abdiff">Δ%</div><div class="absig">p-val</div></div>`;
+  d.comparisons.forEach(c=>{
+    const pct=c.pct_diff!==null?(c.pct_diff>0?`▲${c.pct_diff.toFixed(1)}%`:`▼${Math.abs(c.pct_diff).toFixed(1)}%`):'—';
+    const pc=c.pct_diff>0?'var(--green)':c.pct_diff<0?'var(--red)':'var(--text3)';
+    html+=`<div class="abrow"><div class="abcol" title="${c.col}">${c.col}</div><div class="aba"><span class="mono">${fmtK(c.a_mean)}</span><br><span style="font-size:9px;color:var(--text3)">±${fmtK(c.a_std)}</span></div><div class="abb"><span class="mono">${fmtK(c.b_mean)}</span><br><span style="font-size:9px;color:var(--text3)">±${fmtK(c.b_std)}</span></div><div class="abdiff" style="color:${pc};font-family:var(--mono);font-size:10px">${pct}</div><div class="absig">${c.significant?'<span class="b bok">✓</span>':'<span class="b bneu">—</span>'}</div></div>`;
+    if(c.cohens_d!==null){const eff=Math.abs(c.cohens_d)>0.8?'large':Math.abs(c.cohens_d)>0.5?'medium':'small';html+=`<div style="padding:0 0 6px 110px;font-size:9px;font-family:var(--mono);color:var(--text3)">d=${fmt(c.cohens_d)} (${eff} effect) · p=${fmt(c.p_value,4)}</div>`;}
+  });
+  html+=`</div>`;
+  const cd=d.comparisons.slice(0,8);
+  if(cd.length)html+=`<div class="card"><div class="card-h"><div class="card-t">Mean Comparison</div></div><canvas id="abc" height="80"></canvas></div>`;
+  el.innerHTML=html;
+  if(cd.length){setTimeout(()=>{mkChart('abc',{type:'bar',data:{labels:cd.map(c=>c.col.substring(0,12)),datasets:[{label:d.group_a,data:cd.map(c=>c.a_mean),backgroundColor:'rgba(91,141,238,.7)',borderRadius:3},{label:d.group_b,data:cd.map(c=>c.b_mean),backgroundColor:'rgba(19,232,130,.7)',borderRadius:3}]},options:CD})},80);}
+}
+
+// ═══ EXPORT ═══
+function exportData(fmt){window.open(`${API}/export?session_id=${SID}&format=${fmt}`,'_blank')}
+
+Chart.defaults.font.family="'JetBrains Mono',monospace";
+Chart.defaults.font.size=11;
+</script>
+</body>
+</html>

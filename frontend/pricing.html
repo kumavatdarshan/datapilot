@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DataPilot — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0e0c09;
+    --ink2: #3d3929;
+    --ink3: #7a7569;
+    --paper: #faf8f3;
+    --paper2: #f0ede4;
+    --paper3: #e5e0d3;
+    --gold: #c8963c;
+    --gold-light: #f5e8c8;
+    --teal: #1a7a6a;
+    --teal-light: #e0f2ee;
+    --purple: #5b3fa8;
+    --purple-light: #ede8f9;
+    --red: #c0392b;
+    --border: rgba(14,12,9,0.1);
+    --radius: 16px;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 60px;
+    background: rgba(250,248,243,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -.02em; }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+  .nav-links a { font-size: 0.875rem; color: var(--ink2); text-decoration: none; transition: color .2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .btn-nav {
+    font-size: 0.875rem; padding: 0.4rem 1.1rem;
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 8px; cursor: pointer;
+    text-decoration: none; transition: opacity .2s;
+  }
+  .btn-nav:hover { opacity: .8; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 120px 2rem 60px;
+    text-align: center;
+    max-width: 760px; margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block; font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; font-weight: 500;
+    color: var(--gold); background: var(--gold-light);
+    padding: 4px 12px; border-radius: 20px;
+    border: 1px solid rgba(200,150,60,0.25);
+    margin-bottom: 1.5rem; letter-spacing: .05em;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    line-height: 1.1; letter-spacing: -.03em;
+    color: var(--ink); margin-bottom: 1rem;
+  }
+  h1 em { font-style: normal; color: var(--gold); }
+  .hero p {
+    font-size: 1.05rem; color: var(--ink2); font-weight: 300;
+    max-width: 520px; margin: 0 auto 2rem;
+  }
+  .toggle-wrap {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--paper2); border: 1px solid var(--border);
+    border-radius: 40px; padding: 5px 18px 5px 5px;
+    font-size: 0.85rem; color: var(--ink2); cursor: pointer;
+    margin-bottom: 3.5rem;
+  }
+  .toggle-track {
+    width: 42px; height: 24px; background: var(--paper3);
+    border-radius: 12px; position: relative; transition: background .25s;
+  }
+  .toggle-track.active { background: var(--teal); }
+  .toggle-knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; background: white;
+    border-radius: 50%; transition: transform .25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  }
+  .toggle-track.active .toggle-knob { transform: translateX(18px); }
+  .save-badge {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    background: var(--teal); color: white;
+    padding: 2px 8px; border-radius: 20px;
+  }
+
+  /* ── CARDS ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 1060px; margin: 0 auto; padding: 0 2rem 5rem;
+  }
+  .card {
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 2rem;
+    position: relative; transition: transform .2s, box-shadow .2s;
+    display: flex; flex-direction: column;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(14,12,9,.08); }
+  .card.popular {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 1px var(--gold), 0 8px 32px rgba(200,150,60,.12);
+  }
+  .popular-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 500;
+    background: var(--gold); color: white;
+    padding: 3px 14px; border-radius: 20px; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  .card-tier {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.9rem; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink3); margin-bottom: 0.5rem;
+  }
+  .card.popular .card-tier { color: var(--gold); }
+  .card-price {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 2.6rem; line-height: 1; letter-spacing: -.04em;
+    margin-bottom: 0.25rem;
+  }
+  .card-price sup {
+    font-size: 1rem; vertical-align: super; letter-spacing: 0; font-weight: 600;
+  }
+  .card-price .period {
+    font-size: 0.95rem; font-weight: 400; color: var(--ink3);
+    font-family: 'DM Sans', sans-serif; letter-spacing: 0;
+  }
+  .card-desc {
+    font-size: 0.85rem; color: var(--ink3); margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+    font-weight: 300;
+  }
+  .features { list-style: none; flex: 1; margin-bottom: 1.75rem; }
+  .features li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.875rem; color: var(--ink2); padding: 5px 0;
+  }
+  .features li.locked { color: var(--ink3); text-decoration: none; opacity: .6; }
+  .check {
+    width: 18px; height: 18px; flex-shrink: 0;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .check-yes { background: var(--teal-light); }
+  .check-no  { background: var(--paper3); }
+  .check svg { width: 10px; height: 10px; }
+
+  /* ── CTAs ── */
+  .btn-cta {
+    display: block; width: 100%; text-align: center;
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 0.9rem; letter-spacing: .01em;
+    padding: 0.85rem 1.5rem; border-radius: 10px;
+    border: none; cursor: pointer; text-decoration: none;
+    transition: all .2s;
+  }
+  .btn-free {
+    background: var(--paper2); color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-free:hover { background: var(--paper3); }
+  .btn-pro {
+    background: var(--gold); color: white;
+  }
+  .btn-pro:hover { background: #b8852e; }
+  .btn-team {
+    background: var(--ink); color: white;
+  }
+  .btn-team:hover { opacity: .85; }
+
+  /* ── COMPARE TABLE ── */
+  .compare-section {
+    max-width: 900px; margin: 0 auto; padding: 0 2rem 6rem;
+  }
+  .section-head {
+    text-align: center; margin-bottom: 2.5rem;
+  }
+  .section-head h2 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 1.8rem; letter-spacing: -.03em; margin-bottom: .5rem;
+  }
+  .section-head p { font-size: .9rem; color: var(--ink3); }
+
+  .compare-table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+  .compare-table th {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .8rem;
+    text-transform: uppercase; letter-spacing: .06em;
+    padding: 1rem 1.25rem; text-align: left;
+    border-bottom: 2px solid var(--border);
+  }
+  .compare-table th:not(:first-child) { text-align: center; }
+  .compare-table td {
+    padding: .8rem 1.25rem; border-bottom: 1px solid var(--border);
+    color: var(--ink2);
+  }
+  .compare-table td:not(:first-child) { text-align: center; }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table .cat-row td {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: .75rem; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink3); background: var(--paper2); padding: .6rem 1.25rem;
+  }
+  .dot-yes { color: var(--teal); font-size: 1.1rem; }
+  .dot-no  { color: var(--paper3); font-size: 1.1rem; }
+  .highlight-col { background: rgba(200,150,60,.05); }
+
+  /* ── FAQ ── */
+  .faq-section {
+    max-width: 680px; margin: 0 auto; padding: 0 2rem 7rem;
+  }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; background: none; border: none; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 0; text-align: left;
+    font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 500;
+    color: var(--ink);
+  }
+  .faq-icon { font-size: 1.25rem; color: var(--gold); transition: transform .25s; }
+  .faq-item.open .faq-icon { transform: rotate(45deg); }
+  .faq-a {
+    display: none; padding: 0 0 1.2rem;
+    font-size: .875rem; color: var(--ink2); font-weight: 300; line-height: 1.7;
+  }
+  .faq-item.open .faq-a { display: block; }
+
+  /* ── FOOTER CTA ── */
+  .footer-cta {
+    background: var(--ink); color: white;
+    text-align: center; padding: 5rem 2rem;
+  }
+  .footer-cta h2 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -.03em;
+    margin-bottom: 1rem;
+  }
+  .footer-cta p { color: rgba(255,255,255,.6); font-weight: 300; margin-bottom: 2rem; }
+  .btn-cta-white {
+    display: inline-block; font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: .95rem; padding: .9rem 2.5rem;
+    background: var(--gold); color: white; border-radius: 10px;
+    text-decoration: none; transition: background .2s;
+  }
+  .btn-cta-white:hover { background: #b8852e; }
+
+  /* ── AUTH MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(14,12,9,.55);
+    backdrop-filter: blur(4px); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white; border-radius: 20px;
+    width: min(440px, 95vw); padding: 2.5rem;
+    transform: translateY(16px); transition: transform .25s;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal h3 {
+    font-family: 'Syne', sans-serif; font-weight: 800;
+    font-size: 1.5rem; margin-bottom: .35rem; letter-spacing: -.02em;
+  }
+  .modal-sub { font-size: .875rem; color: var(--ink3); margin-bottom: 1.75rem; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: .8rem; font-weight: 500; margin-bottom: .4rem; color: var(--ink2); }
+  .field input {
+    width: 100%; padding: .7rem 1rem; font-size: .9rem;
+    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--paper); outline: none; transition: border-color .2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .field input:focus { border-color: var(--gold); }
+  .btn-submit {
+    width: 100%; padding: .85rem; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: .9rem;
+    background: var(--gold); color: white; border: none;
+    border-radius: 10px; cursor: pointer; margin-top: .5rem;
+    transition: background .2s;
+  }
+  .btn-submit:hover { background: #b8852e; }
+  .modal-switch {
+    text-align: center; font-size: .8rem; color: var(--ink3);
+    margin-top: 1rem; cursor: pointer;
+  }
+  .modal-switch span { color: var(--gold); text-decoration: underline; }
+  .modal-error { font-size: .8rem; color: var(--red); margin-top: .5rem; }
+  .modal-close {
+    position: absolute; top: 1.25rem; right: 1.25rem;
+    background: var(--paper2); border: none; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Data<span>Pilot</span></div>
+  <div class="nav-links">
+    <a href="/">App</a>
+    <a href="#compare">Compare</a>
+    <a href="#faq">FAQ</a>
+    <a href="#" class="btn-nav" id="nav-login-btn">Log in</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Simple, transparent pricing</div>
+  <h1>The <em>right plan</em> for every data team</h1>
+  <p>From solo analysts to enterprise teams. No hidden fees. Cancel anytime.</p>
+
+  <div class="toggle-wrap" onclick="toggleBilling()" id="billing-toggle">
+    <div class="toggle-track" id="toggle-track">
+      <div class="toggle-knob"></div>
+    </div>
+    <span id="billing-label">Monthly billing</span>
+    <span class="save-badge" id="save-badge" style="display:none">Save 20%</span>
+  </div>
+</section>
+
+<!-- PRICING CARDS -->
+<div class="cards-grid" id="cards-grid">
+
+  <!-- FREE -->
+  <div class="card" id="card-free">
+    <div class="card-tier">Free</div>
+    <div class="card-price">$0<span class="period">/mo</span></div>
+    <div class="card-desc">Get started with basic data exploration. No credit card needed.</div>
+    <ul class="features">
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Up to 500 rows per dataset</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Data profiling &amp; EDA charts</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Data cleaning tools</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>CSV &amp; JSON export</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>20 API calls/day</li>
+      <li class="locked"><span class="check check-no"><svg viewBox="0 0 10 10"><line x1="2" y1="5" x2="8" y2="5" stroke="#aaa" stroke-width="1.8" stroke-linecap="round"/></svg></span>ML model training</li>
+      <li class="locked"><span class="check check-no"><svg viewBox="0 0 10 10"><line x1="2" y1="5" x2="8" y2="5" stroke="#aaa" stroke-width="1.8" stroke-linecap="round"/></svg></span>AI natural language queries</li>
+      <li class="locked"><span class="check check-no"><svg viewBox="0 0 10 10"><line x1="2" y1="5" x2="8" y2="5" stroke="#aaa" stroke-width="1.8" stroke-linecap="round"/></svg></span>Time series forecasting</li>
+    </ul>
+    <a href="#" class="btn-cta btn-free" onclick="openModal('register')">Get started free</a>
+  </div>
+
+  <!-- PRO -->
+  <div class="card popular" id="card-pro">
+    <div class="popular-badge">Most popular</div>
+    <div class="card-tier">Pro</div>
+    <div class="card-price" id="pro-price"><sup>$</sup>29<span class="period">/mo</span></div>
+    <div class="card-desc">Full ML suite for serious analysts. Everything you need to go from raw data to insights.</div>
+    <ul class="features">
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Up to 500,000 rows</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>50 saved datasets</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>6 ML algorithms (RF, GBM, Ridge…)</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>ARIMA &amp; ETS forecasting</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>AI natural language queries</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>PDF &amp; PowerPoint reports</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Files up to 50 MB</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>2,000 API calls/day</li>
+    </ul>
+    <a href="#" class="btn-cta btn-pro" id="pro-cta" onclick="startCheckout('pro')">Start Pro — $29/mo</a>
+  </div>
+
+  <!-- TEAM -->
+  <div class="card" id="card-team">
+    <div class="card-tier">Team</div>
+    <div class="card-price" id="team-price"><sup>$</sup>149<span class="period">/mo</span></div>
+    <div class="card-desc">For data teams that move fast. Shared workspaces, white-label reports, and API access.</div>
+    <ul class="features">
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Up to 5 million rows</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>500 saved datasets</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Everything in Pro</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>20 team seats</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Shared team workspaces</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>White-label PDF reports</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>REST API access</li>
+      <li><span class="check check-yes"><svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" fill="none" stroke="#1a7a6a" stroke-width="1.8" stroke-linecap="round"/></svg></span>Priority support</li>
+    </ul>
+    <a href="#" class="btn-cta btn-team" id="team-cta" onclick="startCheckout('team')">Start Team — $149/mo</a>
+  </div>
+
+</div>
+
+<!-- COMPARE TABLE -->
+<section class="compare-section" id="compare">
+  <div class="section-head">
+    <h2>Full comparison</h2>
+    <p>Every feature, side by side.</p>
+  </div>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Free</th>
+        <th class="highlight-col" style="color:var(--gold)">Pro</th>
+        <th>Team</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="cat-row"><td colspan="4">Data limits</td></tr>
+      <tr><td>Max rows</td><td>500</td><td class="highlight-col">500,000</td><td>5,000,000</td></tr>
+      <tr><td>Max file size</td><td>2 MB</td><td class="highlight-col">50 MB</td><td>500 MB</td></tr>
+      <tr><td>Saved datasets</td><td>1</td><td class="highlight-col">50</td><td>500</td></tr>
+      <tr><td>API calls / day</td><td>20</td><td class="highlight-col">2,000</td><td>20,000</td></tr>
+
+      <tr class="cat-row"><td colspan="4">Analysis</td></tr>
+      <tr><td>Data profiling &amp; EDA</td><td><span class="dot-yes">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>Data cleaning</td><td><span class="dot-yes">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>Correlation &amp; ANOVA</td><td><span class="dot-yes">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>A/B testing (Welch t-test)</td><td><span class="dot-yes">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+
+      <tr class="cat-row"><td colspan="4">Machine learning</td></tr>
+      <tr><td>ML model training (6 algorithms)</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>Save &amp; reload models</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>Time series forecasting</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>K-Means clustering</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+
+      <tr class="cat-row"><td colspan="4">AI features</td></tr>
+      <tr><td>AI natural language queries</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>AI-written report commentary</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+
+      <tr class="cat-row"><td colspan="4">Export &amp; sharing</td></tr>
+      <tr><td>CSV &amp; JSON export</td><td>Watermarked</td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>PDF reports</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-yes">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>White-label reports</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-no">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>REST API access</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-no">●</span></td><td><span class="dot-yes">●</span></td></tr>
+
+      <tr class="cat-row"><td colspan="4">Team</td></tr>
+      <tr><td>Seats</td><td>1</td><td class="highlight-col">1</td><td>20</td></tr>
+      <tr><td>Shared workspaces</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-no">●</span></td><td><span class="dot-yes">●</span></td></tr>
+      <tr><td>Priority support</td><td><span class="dot-no">●</span></td><td class="highlight-col"><span class="dot-no">●</span></td><td><span class="dot-yes">●</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="section-head">
+    <h2>Questions &amp; answers</h2>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Can I switch plans later? <span class="faq-icon">+</span></button>
+    <div class="faq-a">Yes — upgrade or downgrade anytime from your account settings. Upgrades take effect immediately (prorated). Downgrades apply at the end of your billing cycle.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">What happens to my data if I downgrade? <span class="faq-icon">+</span></button>
+    <div class="faq-a">Your datasets are never deleted when you downgrade. If you exceed the Free tier limits you'll be in read-only mode until you either upgrade or remove some datasets.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Is there a free trial for Pro? <span class="faq-icon">+</span></button>
+    <div class="faq-a">Yes — all paid plans come with a 14-day free trial. No credit card needed to start. You'll only be charged after the trial ends if you decide to continue.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">What file formats are supported? <span class="faq-icon">+</span></button>
+    <div class="faq-a">CSV, Excel (.xlsx, .xls), JSON, and TSV. The auto-detection engine handles most encoding issues (UTF-8, latin-1, Windows-1252) and auto-parses dates and numbers.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">How does the API access on Team work? <span class="faq-icon">+</span></button>
+    <div class="faq-a">Team plan users get a dedicated API key and access to all DataPilot endpoints via REST. You can run forecasts, train models, and clean data programmatically — all with your 20,000 calls/day quota.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q" onclick="toggleFaq(this)">Where is my data stored? <span class="faq-icon">+</span></button>
+    <div class="faq-a">Datasets are stored encrypted at rest on S3. Sessions are isolated per user — no other user can access your data. You can delete all your data at any time from the settings page.</div>
+  </div>
+</section>
+
+<!-- FOOTER CTA -->
+<div class="footer-cta">
+  <h2>Start analysing your data today</h2>
+  <p>Free forever. No credit card. Upgrade when you're ready.</p>
+  <a href="#" class="btn-cta-white" onclick="openModal('register')">Create free account →</a>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <h3 id="modal-title">Create your account</h3>
+    <p class="modal-sub" id="modal-sub">Free forever. No credit card required.</p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="modal-email" placeholder="you@company.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="modal-pw" placeholder="At least 8 characters" autocomplete="current-password">
+    </div>
+    <div class="modal-error" id="modal-error"></div>
+    <button class="btn-submit" id="modal-submit" onclick="handleAuth()">Create account</button>
+    <div class="modal-switch" id="modal-switch" onclick="toggleAuthMode()">
+      Already have an account? <span>Log in</span>
+    </div>
+  </div>
+</div>
+
+<script>
+let isAnnual = false;
+let authMode = 'register'; // 'register' or 'login'
+let pendingCheckoutTier = null;
+
+const PRICES = { monthly: { pro: 29, team: 149 }, annual: { pro: 23, team: 119 } };
+
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const track = document.getElementById('toggle-track');
+  const label = document.getElementById('billing-label');
+  const badge = document.getElementById('save-badge');
+  track.classList.toggle('active', isAnnual);
+  label.textContent = isAnnual ? 'Annual billing' : 'Monthly billing';
+  badge.style.display = isAnnual ? 'inline' : 'none';
+
+  const p = isAnnual ? PRICES.annual : PRICES.monthly;
+  document.getElementById('pro-price').innerHTML = `<sup>$</sup>${p.pro}<span class="period">/mo</span>`;
+  document.getElementById('team-price').innerHTML = `<sup>$</sup>${p.team}<span class="period">/mo</span>`;
+  document.getElementById('pro-cta').textContent = `Start Pro — $${p.pro}/mo`;
+  document.getElementById('team-cta').textContent = `Start Team — $${p.team}/mo`;
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+function openModal(mode) {
+  authMode = mode;
+  const overlay = document.getElementById('modal-overlay');
+  document.getElementById('modal-title').textContent = mode === 'register' ? 'Create your account' : 'Welcome back';
+  document.getElementById('modal-sub').textContent = mode === 'register' ? 'Free forever. No credit card required.' : 'Log in to your DataPilot account.';
+  document.getElementById('modal-submit').textContent = mode === 'register' ? 'Create account' : 'Log in';
+  document.getElementById('modal-switch').innerHTML = mode === 'register'
+    ? 'Already have an account? <span>Log in</span>'
+    : "Don't have an account? <span>Sign up free</span>";
+  document.getElementById('modal-error').textContent = '';
+  overlay.classList.add('show');
+  setTimeout(() => document.getElementById('modal-email').focus(), 100);
+  return false;
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('show');
+  pendingCheckoutTier = null;
+}
+
+function toggleAuthMode() {
+  openModal(authMode === 'register' ? 'login' : 'register');
+}
+
+async function handleAuth() {
+  const email = document.getElementById('modal-email').value.trim();
+  const pw    = document.getElementById('modal-pw').value;
+  const errEl = document.getElementById('modal-error');
+  const btn   = document.getElementById('modal-submit');
+  errEl.textContent = '';
+
+  if (!email || !pw) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (authMode === 'register' && pw.length < 8) {
+    errEl.textContent = 'Password must be at least 8 characters.'; return;
+  }
+
+  btn.textContent = 'Please wait…'; btn.disabled = true;
+
+  try {
+    const endpoint = authMode === 'register' ? '/auth/register' : '/auth/login';
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pw})
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.detail || 'Something went wrong.'; return; }
+
+    // Store token
+    localStorage.setItem('dp_token', data.token);
+    document.cookie = `dp_token=${data.token}; path=/; max-age=259200; samesite=lax`;
+
+    closeModalDirect();
+
+    if (pendingCheckoutTier) {
+      await launchCheckout(pendingCheckoutTier);
+    } else {
+      window.location.href = '/';
+    }
+  } catch (e) {
+    errEl.textContent = 'Network error. Is the server running?';
+  } finally {
+    btn.textContent = authMode === 'register' ? 'Create account' : 'Log in';
+    btn.disabled = false;
+  }
+}
+
+async function startCheckout(tier) {
+  const token = localStorage.getItem('dp_token');
+  if (!token) {
+    pendingCheckoutTier = tier;
+    openModal('register');
+    return false;
+  }
+  await launchCheckout(tier);
+  return false;
+}
+
+async function launchCheckout(tier) {
+  const token = localStorage.getItem('dp_token');
+  try {
+    const res = await fetch('/stripe/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+      body: JSON.stringify({ tier, success_url: window.location.origin + '/?upgraded=1', cancel_url: window.location.href })
+    });
+    const data = await res.json();
+    if (data.checkout_url) window.location.href = data.checkout_url;
+    else alert('Could not start checkout: ' + (data.detail || 'Unknown error'));
+  } catch(e) {
+    alert('Network error. Please try again.');
+  }
+}
+
+// Nav login button
+document.getElementById('nav-login-btn').addEventListener('click', (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('dp_token');
+  if (token) window.location.href = '/';
+  else openModal('login');
+});
+
+// Update nav if already logged in
+const token = localStorage.getItem('dp_token');
+if (token) {
+  document.getElementById('nav-login-btn').textContent = 'Go to app →';
+}
+
+// Enter key in modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('show')) handleAuth();
+  if (e.key === 'Escape') closeModalDirect();
+});
+
+// Check for upgrade success
+if (new URLSearchParams(location.search).get('upgraded') === '1') {
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:68px;left:50%;transform:translateX(-50%);background:#1a7a6a;color:white;padding:.75rem 2rem;border-radius:10px;font-size:.9rem;z-index:99;font-weight:500';
+  banner.textContent = '🎉 Welcome to Pro! Your plan has been upgraded.';
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 5000);
+}
+</script>
+</body>
+</html>
